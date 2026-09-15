@@ -13,9 +13,11 @@ import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
 import ScheduleOutlinedIcon from "@mui/icons-material/ScheduleOutlined";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import WorkOutlineIcon from "@mui/icons-material/WorkOutlineOutlined";
+import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 
 const NAV_ITEMS = [
   { href: "/panel/perfil", label: "Perfil", icon: PersonOutlineIcon, professionalOnly: false },
+  { href: "/buscar", label: "Buscar profesional", icon: SearchOutlinedIcon, professionalOnly: false },
   { href: "/panel/solicitudes", label: "Solicitudes", icon: AssignmentOutlinedIcon, professionalOnly: true },
   { href: "/panel/horario", label: "Horario", icon: ScheduleOutlinedIcon, professionalOnly: true },
   { href: "/panel/calendario", label: "Calendario", icon: CalendarMonthOutlinedIcon, professionalOnly: true },
