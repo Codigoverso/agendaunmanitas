@@ -29,6 +29,16 @@ type FeaturedProfessional = {
 export default async function Home() {
   const supabase = await createClient();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { data: profile } = user
+    ? await supabase.from("profiles").select("full_name, avatar_url").eq("id", user.id).single()
+    : { data: null };
+
+  const displayName = profile?.full_name || user?.email || "";
+
   const { data: trades } = await supabase.from("trades").select("id, slug, label").order("id");
 
   const { data: featured } = await supabase
@@ -55,12 +65,29 @@ export default async function Home() {
               <LinkText href="/buscar" underline="none" sx={{ fontWeight: 500, display: { xs: "none", sm: "inline" } }}>
                 Buscar profesional
               </LinkText>
-              <LinkButton href="/entrar" variant="text">
-                Entrar
-              </LinkButton>
-              <LinkButton href="/registro" variant="contained">
-                Crear cuenta
-              </LinkButton>
+              {user ? (
+                <LinkText
+                  href="/panel/perfil"
+                  underline="none"
+                  sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.primary" }}
+                >
+                  <Avatar src={profile?.avatar_url ?? undefined} sx={{ width: 32, height: 32, fontSize: 15 }}>
+                    {displayName.charAt(0).toUpperCase()}
+                  </Avatar>
+                  <Typography variant="body2" sx={{ fontWeight: 500, display: { xs: "none", sm: "block" } }}>
+                    {displayName}
+                  </Typography>
+                </LinkText>
+              ) : (
+                <>
+                  <LinkButton href="/entrar" variant="text">
+                    Entrar
+                  </LinkButton>
+                  <LinkButton href="/registro" variant="contained">
+                    Crear cuenta
+                  </LinkButton>
+                </>
+              )}
             </Stack>
           </Stack>
         </Container>
