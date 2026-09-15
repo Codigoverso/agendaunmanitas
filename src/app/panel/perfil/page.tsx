@@ -2,13 +2,15 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { uploadAvatar } from "../actions";
 import { firstOf, coverageLabel } from "@/lib/professional";
+import { Notice } from "@/components/Notice";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export default async function PerfilPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; message?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, message } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -38,20 +40,21 @@ export default async function PerfilPage({
     <div>
       <h1 className="text-2xl font-semibold text-zinc-900">Tu perfil</h1>
 
-      {error && (
-        <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
-      )}
+      <div className="mt-4">
+        <Notice type="success">{message}</Notice>
+        <Notice type="error">{error}</Notice>
+      </div>
 
       <section className="mt-6">
         <h2 className="text-sm font-medium text-zinc-700">Foto de perfil</h2>
         <form action={uploadAvatar} className="mt-2 flex flex-wrap items-center gap-3">
           <input type="file" name="avatar" accept="image/*" required className="text-sm" />
-          <button
-            type="submit"
+          <SubmitButton
+            pendingText="Subiendo..."
             className="rounded-md bg-teal-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-teal-800"
           >
             Subir
-          </button>
+          </SubmitButton>
         </form>
       </section>
 

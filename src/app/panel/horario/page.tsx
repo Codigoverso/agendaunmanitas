@@ -2,8 +2,15 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { setWeeklyAvailability } from "../actions";
 import { WEEKDAY_LABELS } from "@/lib/dates";
+import { Notice } from "@/components/Notice";
+import { SubmitButton } from "@/components/SubmitButton";
 
-export default async function HorarioPage() {
+export default async function HorarioPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ message?: string }>;
+}) {
+  const { message } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -31,6 +38,10 @@ export default async function HorarioPage() {
         Marca los días que trabajas habitualmente y de qué hora a qué hora. Se usará como base
         del calendario — luego puedes marcar como ocupado cualquier hueco concreto.
       </p>
+
+      <div className="mt-4">
+        <Notice type="success">{message}</Notice>
+      </div>
 
       <form action={setWeeklyAvailability} className="mt-6 flex flex-col gap-2">
         {Object.entries(WEEKDAY_LABELS).map(([day, label]) => {
@@ -72,12 +83,9 @@ export default async function HorarioPage() {
             </div>
           );
         })}
-        <button
-          type="submit"
-          className="mt-2 self-start rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800"
-        >
+        <SubmitButton className="mt-2 self-start rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800">
           Guardar horario
-        </button>
+        </SubmitButton>
       </form>
     </div>
   );

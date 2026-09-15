@@ -35,5 +35,5 @@ export async function activateProfessional(formData: FormData) {
     }
   }
 
-  redirect("/panel");
+  redirect(`/panel/perfil?message=${encodeURIComponent("Modo profesional activado.")}`);
 }

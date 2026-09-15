@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { toggleBlockedSlot } from "../actions";
+import { CalendarSlotButton } from "@/components/CalendarSlotButton";
 import {
   WEEKDAY_SHORT,
   isoWeekday,
@@ -117,13 +118,7 @@ export default async function CalendarioPage({
                   return (
                     <td key={date} className="border border-zinc-100 p-0">
                       <form action={toggleBlockedSlot.bind(null, date, time, isBlocked)}>
-                        <button
-                          type="submit"
-                          title={`${time} · ${isBlocked ? "Ocupado" : "Disponible"}`}
-                          className={`h-4 w-full ${
-                            isBlocked ? "bg-red-100 hover:bg-red-200" : "bg-teal-100 hover:bg-teal-200"
-                          }`}
-                        />
+                        <CalendarSlotButton isBlocked={isBlocked} time={time} />
                       </form>
                     </td>
                   );

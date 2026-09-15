@@ -34,6 +34,7 @@ export async function uploadAvatar(formData: FormData) {
   await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("id", user.id);
 
   revalidatePath("/panel", "layout");
+  redirect(`/panel/perfil?message=${encodeURIComponent("Foto de perfil actualizada.")}`);
 }
 
 export async function setWeeklyAvailability(formData: FormData) {
@@ -60,6 +61,7 @@ export async function setWeeklyAvailability(formData: FormData) {
 
   revalidatePath("/panel/horario");
   revalidatePath("/panel/calendario");
+  redirect(`/panel/horario?message=${encodeURIComponent("Horario guardado.")}`);
 }
 
 export async function toggleBlockedSlot(date: string, time: string, isBlocked: boolean) {

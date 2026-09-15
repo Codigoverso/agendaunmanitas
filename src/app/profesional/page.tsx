@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { activateProfessional } from "./actions";
 import { OptionalLocationFields } from "@/components/OptionalLocationFields";
+import { Notice } from "@/components/Notice";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export default async function ActivateProfessionalPage({
   searchParams,
@@ -23,7 +25,7 @@ export default async function ActivateProfessionalPage({
     .eq("id", user.id)
     .maybeSingle();
 
-  if (professional) redirect("/panel");
+  if (professional) redirect("/panel/perfil");
 
   return (
     <div className="mx-auto w-full max-w-lg px-4 py-16">
@@ -32,9 +34,7 @@ export default async function ActivateProfessionalPage({
         Rellena tus datos para empezar a recibir solicitudes.
       </p>
 
-      {error && (
-        <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
-      )}
+      <Notice type="error">{error}</Notice>
 
       <form action={activateProfessional} className="mt-6 flex flex-col gap-4">
         <div>
@@ -67,12 +67,12 @@ export default async function ActivateProfessionalPage({
           </p>
           <OptionalLocationFields />
         </fieldset>
-        <button
-          type="submit"
+        <SubmitButton
+          pendingText="Activando..."
           className="mt-2 rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800"
         >
           Activar
-        </button>
+        </SubmitButton>
       </form>
     </div>
   );

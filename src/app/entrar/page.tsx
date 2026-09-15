@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { signIn } from "@/app/auth/actions";
+import { Notice } from "@/components/Notice";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export default async function LoginPage({
   searchParams,
@@ -16,17 +18,8 @@ export default async function LoginPage({
           Accede a tu cuenta de AgendaUnManitas.
         </p>
 
-        {message && (
-          <p className="mt-4 rounded-md bg-teal-50 px-3 py-2 text-sm text-teal-800">
-            {message}
-          </p>
-        )}
-
-        {error && (
-          <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
-            {error}
-          </p>
-        )}
+        <Notice type="success">{message}</Notice>
+        <Notice type="error">{error}</Notice>
 
         <form action={signIn} className="mt-6 flex flex-col gap-4">
           <div>
@@ -54,12 +47,9 @@ export default async function LoginPage({
               className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none"
             />
           </div>
-          <button
-            type="submit"
-            className="mt-2 rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800"
-          >
+          <SubmitButton className="mt-2 rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800">
             Entrar
-          </button>
+          </SubmitButton>
         </form>
 
         <p className="mt-6 text-sm text-zinc-600">

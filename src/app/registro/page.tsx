@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { signUp } from "@/app/auth/actions";
 import { LocationFields } from "@/components/LocationFields";
+import { Notice } from "@/components/Notice";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export default async function SignupPage({
   searchParams,
@@ -18,11 +20,7 @@ export default async function SignupPage({
           más adelante.
         </p>
 
-        {error && (
-          <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
-            {error}
-          </p>
-        )}
+        <Notice type="error">{error}</Notice>
 
         <form action={signUp} className="mt-6 flex flex-col gap-4">
           <div>
@@ -63,12 +61,9 @@ export default async function SignupPage({
               className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none"
             />
           </div>
-          <button
-            type="submit"
-            className="mt-2 rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800"
-          >
+          <SubmitButton className="mt-2 rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800">
             Crear cuenta
-          </button>
+          </SubmitButton>
         </form>
 
         <p className="mt-6 text-sm text-zinc-600">
