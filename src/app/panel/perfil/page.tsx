@@ -39,9 +39,9 @@ export default async function PerfilPage({
     .eq("id", user.id)
     .maybeSingle();
 
-  const { data: allTrades } = professional
+  const { data: allTrades, error: tradesError } = professional
     ? await supabase.from("trades").select("id, label").order("id")
-    : { data: null };
+    : { data: null, error: null };
 
   const { data: myTrades } = professional
     ? await supabase.from("professional_trades").select("trade_id").eq("professional_id", user.id)
@@ -129,6 +129,15 @@ export default async function PerfilPage({
               <Typography variant="subtitle2" gutterBottom>
                 Tus oficios
               </Typography>
+              {tradesError && (
+                <Notice type="error">{`No se pudo cargar la lista de oficios: ${tradesError.message}`}</Notice>
+              )}
+              {!tradesError && allTrades?.length === 0 && (
+                <Notice type="error">
+                  No hay ningún oficio dado de alta todavía (la tabla &quot;trades&quot; está
+                  vacía) — ejecuta la migración que crea los oficios en Supabase.
+                </Notice>
+              )}
               <Box component="form" action={updateTrades} sx={{ mt: 1 }}>
                 <FormGroup row>
                   {allTrades?.map((trade) => (
