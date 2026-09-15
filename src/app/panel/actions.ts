@@ -100,10 +100,21 @@ export async function updateProfessionalInfo(formData: FormData) {
   const coverage_city = String(formData.get("city") || "") || null;
   const coverage_province = String(formData.get("province") || "") || null;
   const coverage_region = String(formData.get("region") || "") || null;
+  const contact_email = String(formData.get("contact_email") || "") || null;
+  const contact_phone = String(formData.get("contact_phone") || "") || null;
+  const contact_address = String(formData.get("contact_address") || "") || null;
 
   const { error } = await supabase
     .from("professional_profiles")
-    .update({ bio, coverage_city, coverage_province, coverage_region })
+    .update({
+      bio,
+      coverage_city,
+      coverage_province,
+      coverage_region,
+      contact_email,
+      contact_phone,
+      contact_address,
+    })
     .eq("id", user.id);
 
   if (error) {

@@ -11,6 +11,9 @@ import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Box from "@mui/material/Box";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
+import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
 import { Notice } from "@/components/Notice";
 
 type ProfessionalResult = {
@@ -19,6 +22,9 @@ type ProfessionalResult = {
   coverage_province: string | null;
   coverage_city: string | null;
   bio: string | null;
+  contact_email: string | null;
+  contact_phone: string | null;
+  contact_address: string | null;
   profiles: { full_name: string } | { full_name: string }[] | null;
   professional_trades: { trade_id: number; trades: { label: string } | { label: string }[] | null }[];
   weekly_availability: { day_of_week: number; start_time: string; end_time: string }[];
@@ -74,7 +80,7 @@ export default async function SearchPage({
   let query = supabase
     .from("professional_profiles")
     .select(
-      `id, coverage_region, coverage_province, coverage_city, bio, profiles(full_name), ${selectTrades}, ${selectWeekly}${selectBlocked}`
+      `id, coverage_region, coverage_province, coverage_city, bio, contact_email, contact_phone, contact_address, profiles(full_name), ${selectTrades}, ${selectWeekly}${selectBlocked}`
     )
     .eq("is_active", true);
 
@@ -164,6 +170,28 @@ export default async function SearchPage({
                       Libre el {date}, horario habitual {schedule.start_time.slice(0, 5)}–
                       {schedule.end_time.slice(0, 5)} ({slots.length} huecos de media hora)
                     </Typography>
+                  )}
+                  {(pro.contact_email || pro.contact_phone || pro.contact_address) && (
+                    <Stack spacing={0.5} sx={{ mt: 1.5 }}>
+                      {pro.contact_email && (
+                        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                          <EmailOutlinedIcon fontSize="small" color="action" />
+                          <Typography variant="body2">{pro.contact_email}</Typography>
+                        </Stack>
+                      )}
+                      {pro.contact_phone && (
+                        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                          <PhoneOutlinedIcon fontSize="small" color="action" />
+                          <Typography variant="body2">{pro.contact_phone}</Typography>
+                        </Stack>
+                      )}
+                      {pro.contact_address && (
+                        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                          <PlaceOutlinedIcon fontSize="small" color="action" />
+                          <Typography variant="body2">{pro.contact_address}</Typography>
+                        </Stack>
+                      )}
+                    </Stack>
                   )}
                 </CardContent>
               </Card>

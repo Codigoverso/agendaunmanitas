@@ -35,7 +35,9 @@ export default async function PerfilPage({
 
   const { data: professional } = await supabase
     .from("professional_profiles")
-    .select("bio, coverage_region, coverage_province, coverage_city")
+    .select(
+      "bio, coverage_region, coverage_province, coverage_city, contact_email, contact_phone, contact_address"
+    )
     .eq("id", user.id)
     .maybeSingle();
 
@@ -118,6 +120,29 @@ export default async function PerfilPage({
                   defaultRegion={professional.coverage_region ?? ""}
                   defaultProvince={professional.coverage_province ?? ""}
                   defaultCity={professional.coverage_city ?? ""}
+                />
+                <Typography variant="caption" color="text.secondary">
+                  Vías de contacto (opcionales) — solo se mostrarán si las rellenas.
+                </Typography>
+                <TextField
+                  name="contact_email"
+                  type="email"
+                  label="Email de contacto"
+                  defaultValue={professional.contact_email ?? ""}
+                  fullWidth
+                />
+                <TextField
+                  name="contact_phone"
+                  type="tel"
+                  label="Teléfono de contacto"
+                  defaultValue={professional.contact_phone ?? ""}
+                  fullWidth
+                />
+                <TextField
+                  name="contact_address"
+                  label="Dirección"
+                  defaultValue={professional.contact_address ?? ""}
+                  fullWidth
                 />
                 <SubmitButton sx={{ alignSelf: "flex-start" }}>Guardar</SubmitButton>
               </Stack>
