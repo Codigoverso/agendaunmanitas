@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/auth/actions";
 import { PanelNav } from "@/components/PanelNav";
+import { ADMIN_EMAIL } from "@/lib/admin";
 import Box from "@mui/material/Box";
 import Avatar from "@mui/material/Avatar";
 import Typography from "@mui/material/Typography";
@@ -53,7 +54,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
           </Typography>
         </Box>
 
-        <PanelNav isProfessional={!!professional} />
+        <PanelNav isProfessional={!!professional} isAdmin={user.email === ADMIN_EMAIL} />
 
         <Box component="form" action={signOut} sx={{ mt: 3 }}>
           <Button type="submit" variant="outlined" color="inherit" fullWidth>

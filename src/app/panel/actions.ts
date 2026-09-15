@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { ADMIN_EMAIL } from "@/lib/admin";
 
 export async function uploadAvatar(formData: FormData) {
   const supabase = await createClient();
@@ -149,6 +150,48 @@ export async function updateTrades(formData: FormData) {
   revalidatePath("/panel/perfil");
   revalidatePath("/buscar");
   redirect(`/panel/perfil?message=${encodeURIComponent("Oficios actualizados.")}`);
+}
+
+export async function createUnclaimedListing(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user || user.email !== ADMIN_EMAIL) redirect("/panel/perfil");
+
+  const full_name = String(formData.get("full_name") || "");
+  const bio = String(formData.get("bio") || "");
+  const coverage_city = String(formData.get("city") || "") || null;
+  const coverage_province = String(formData.get("province") || "") || null;
+  const coverage_region = String(formData.get("region") || "") || null;
+  const tradeIds = formData.getAll("trade_ids").map(Number);
+
+  const { data: inserted, error } = await supabase
+    .from("professional_profiles")
+    .insert({
+      full_name,
+      bio,
+      coverage_city,
+      coverage_province,
+      coverage_region,
+      claimed: false,
+    })
+    .select("id")
+    .single();
+
+  if (error || !inserted) {
+    redirect(`/panel/admin?error=${encodeURIComponent(error?.message ?? "Error desconocido")}`);
+  }
+
+  if (tradeIds.length > 0) {
+    await supabase
+      .from("professional_trades")
+      .insert(tradeIds.map((trade_id) => ({ professional_id: inserted.id, trade_id })));
+  }
+
+  revalidatePath("/panel/admin");
+  revalidatePath("/buscar");
+  redirect(`/panel/admin?message=${encodeURIComponent("Negocio añadido al directorio.")}`);
 }
 
 export async function toggleBlockedSlot(date: string, time: string, isBlocked: boolean) {

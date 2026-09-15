@@ -14,18 +14,28 @@ import ScheduleOutlinedIcon from "@mui/icons-material/ScheduleOutlined";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import WorkOutlineIcon from "@mui/icons-material/WorkOutlineOutlined";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
+import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
 
 const NAV_ITEMS = [
-  { href: "/panel/perfil", label: "Perfil", icon: PersonOutlineIcon, professionalOnly: false },
-  { href: "/buscar", label: "Buscar profesional", icon: SearchOutlinedIcon, professionalOnly: false },
-  { href: "/panel/solicitudes", label: "Solicitudes", icon: AssignmentOutlinedIcon, professionalOnly: true },
-  { href: "/panel/horario", label: "Horario", icon: ScheduleOutlinedIcon, professionalOnly: true },
-  { href: "/panel/calendario", label: "Calendario", icon: CalendarMonthOutlinedIcon, professionalOnly: true },
-];
+  { href: "/panel/perfil", label: "Perfil", icon: PersonOutlineIcon, show: "always" },
+  { href: "/buscar", label: "Buscar profesional", icon: SearchOutlinedIcon, show: "always" },
+  { href: "/panel/solicitudes", label: "Solicitudes", icon: AssignmentOutlinedIcon, show: "professional" },
+  { href: "/panel/horario", label: "Horario", icon: ScheduleOutlinedIcon, show: "professional" },
+  { href: "/panel/calendario", label: "Calendario", icon: CalendarMonthOutlinedIcon, show: "professional" },
+  { href: "/panel/admin", label: "Directorio (admin)", icon: StorefrontOutlinedIcon, show: "admin" },
+] as const;
 
-export function PanelNav({ isProfessional }: { isProfessional: boolean }) {
+export function PanelNav({
+  isProfessional,
+  isAdmin,
+}: {
+  isProfessional: boolean;
+  isAdmin: boolean;
+}) {
   const pathname = usePathname();
-  const items = NAV_ITEMS.filter((item) => !item.professionalOnly || isProfessional);
+  const items = NAV_ITEMS.filter(
+    (item) => item.show === "always" || (item.show === "professional" && isProfessional) || (item.show === "admin" && isAdmin)
+  );
 
   return (
     <Box sx={{ mt: 3 }}>

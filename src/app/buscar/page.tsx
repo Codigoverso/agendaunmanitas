@@ -11,6 +11,7 @@ import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Box from "@mui/material/Box";
+import Chip from "@mui/material/Chip";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
 import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
@@ -18,6 +19,8 @@ import { Notice } from "@/components/Notice";
 
 type ProfessionalResult = {
   id: string;
+  full_name: string | null;
+  claimed: boolean;
   coverage_region: string | null;
   coverage_province: string | null;
   coverage_city: string | null;
@@ -80,7 +83,7 @@ export default async function SearchPage({
   let query = supabase
     .from("professional_profiles")
     .select(
-      `id, coverage_region, coverage_province, coverage_city, bio, contact_email, contact_phone, contact_address, profiles(full_name), ${selectTrades}, ${selectWeekly}${selectBlocked}`
+      `id, full_name, claimed, coverage_region, coverage_province, coverage_city, bio, contact_email, contact_phone, contact_address, profiles(full_name), ${selectTrades}, ${selectWeekly}${selectBlocked}`
     )
     .eq("is_active", true);
 
@@ -141,19 +144,28 @@ export default async function SearchPage({
       <Stack spacing={2} sx={{ mt: 4 }}>
         {results && results.length > 0 ? (
           results.map((pro) => {
-            const name = firstOf(pro.profiles)?.full_name ?? "Profesional";
+            const name = pro.full_name || firstOf(pro.profiles)?.full_name || "Profesional";
             const { schedule, slots } = date ? freeSlotsOn(pro, date) : { schedule: null, slots: [] };
             return (
               <Card key={pro.id} variant="outlined">
                 <CardContent>
                   <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "baseline" }}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                      {name}
-                    </Typography>
+                    <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                        {name}
+                      </Typography>
+                      {!pro.claimed && <Chip size="small" label="No registrado" />}
+                    </Stack>
                     <Typography variant="body2" color="text.secondary">
                       {coverageLabel(pro)}
                     </Typography>
                   </Stack>
+                  {!pro.claimed && (
+                    <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
+                      Este negocio todavía no se ha dado de alta en AgendaUnManitas — no se puede
+                      contactar con él a través de la plataforma.
+                    </Typography>
+                  )}
                   {pro.bio && (
                     <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                       {pro.bio}
@@ -171,7 +183,7 @@ export default async function SearchPage({
                       {schedule.end_time.slice(0, 5)} ({slots.length} huecos de media hora)
                     </Typography>
                   )}
-                  {(pro.contact_email || pro.contact_phone || pro.contact_address) && (
+                  {pro.claimed && (pro.contact_email || pro.contact_phone || pro.contact_address) && (
                     <Stack spacing={0.5} sx={{ mt: 1.5 }}>
                       {pro.contact_email && (
                         <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
