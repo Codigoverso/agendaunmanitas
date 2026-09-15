@@ -2,6 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import List from "@mui/material/List";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemText from "@mui/material/ListItemText";
+import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
 
 const NAV_ITEMS = [
   { href: "/panel/perfil", label: "Perfil", professionalOnly: false },
@@ -15,29 +20,31 @@ export function PanelNav({ isProfessional }: { isProfessional: boolean }) {
   const items = NAV_ITEMS.filter((item) => !item.professionalOnly || isProfessional);
 
   return (
-    <nav className="mt-6 flex flex-col gap-1">
-      {items.map((item) => {
-        const active = pathname === item.href;
-        return (
-          <Link
+    <Box sx={{ mt: 3 }}>
+      <List sx={{ py: 0 }}>
+        {items.map((item) => (
+          <ListItemButton
             key={item.href}
+            component={Link}
             href={item.href}
-            className={`rounded-md px-3 py-2 text-sm font-medium ${
-              active ? "bg-teal-50 text-teal-800" : "text-zinc-600 hover:bg-zinc-50"
-            }`}
+            selected={pathname === item.href}
+            sx={{ borderRadius: 1, mb: 0.5 }}
           >
-            {item.label}
-          </Link>
-        );
-      })}
+            <ListItemText primary={item.label} />
+          </ListItemButton>
+        ))}
+      </List>
       {!isProfessional && (
-        <Link
+        <Button
+          component={Link}
           href="/profesional"
-          className="mt-2 rounded-md bg-teal-700 px-3 py-2 text-center text-sm font-medium text-white hover:bg-teal-800"
+          variant="contained"
+          fullWidth
+          sx={{ mt: 1 }}
         >
           Activar modo profesional
-        </Link>
+        </Button>
       )}
-    </nav>
+    </Box>
   );
 }

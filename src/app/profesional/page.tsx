@@ -4,6 +4,14 @@ import { activateProfessional } from "./actions";
 import { OptionalLocationFields } from "@/components/OptionalLocationFields";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
+import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
+import TextField from "@mui/material/TextField";
+import Stack from "@mui/material/Stack";
+import FormGroup from "@mui/material/FormGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
 
 export default async function ActivateProfessionalPage({
   searchParams,
@@ -28,52 +36,63 @@ export default async function ActivateProfessionalPage({
   if (professional) redirect("/panel/perfil");
 
   return (
-    <div className="mx-auto w-full max-w-lg px-4 py-16">
-      <h1 className="text-2xl font-semibold text-zinc-900">Activar modo profesional</h1>
-      <p className="mt-1 text-sm text-zinc-600">
-        Rellena tus datos para empezar a recibir solicitudes.
-      </p>
+    <Box
+      sx={{
+        display: "flex",
+        flexGrow: 1,
+        justifyContent: "center",
+        px: 2,
+        py: 8,
+        bgcolor: "background.default",
+      }}
+    >
+      <Paper elevation={0} variant="outlined" sx={{ width: "100%", maxWidth: 480, p: 4, alignSelf: "flex-start" }}>
+        <Typography variant="h5" sx={{ fontWeight: 600 }}>
+          Activar modo profesional
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+          Rellena tus datos para empezar a recibir solicitudes.
+        </Typography>
 
-      <Notice type="error">{error}</Notice>
+        <Box sx={{ mt: 3 }}>
+          <Notice type="error">{error}</Notice>
+        </Box>
 
-      <form action={activateProfessional} className="mt-6 flex flex-col gap-4">
-        <div>
-          <label htmlFor="bio" className="block text-sm font-medium text-zinc-700">
-            Descripción breve
-          </label>
-          <textarea
-            id="bio"
-            name="bio"
-            rows={3}
-            className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none"
-          />
-        </div>
-        <fieldset>
-          <legend className="text-sm font-medium text-zinc-700">Oficios</legend>
-          <div className="mt-2 grid grid-cols-2 gap-2">
-            {trades?.map((trade) => (
-              <label key={trade.id} className="flex items-center gap-2 text-sm text-zinc-700">
-                <input type="checkbox" name="trade_ids" value={trade.id} className="rounded" />
-                {trade.label}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-        <fieldset className="flex flex-col gap-4">
-          <legend className="text-sm font-medium text-zinc-700">Radio de actuación</legend>
-          <p className="text-xs text-zinc-500">
-            Sin mapa todavía: elige hasta qué nivel quieres acotar dónde trabajas. Puedes
-            dejarlo en &quot;Toda España&quot; si te desplazas a cualquier sitio.
-          </p>
-          <OptionalLocationFields />
-        </fieldset>
-        <SubmitButton
-          pendingText="Activando..."
-          className="mt-2 rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800"
-        >
-          Activar
-        </SubmitButton>
-      </form>
-    </div>
+        <Stack component="form" action={activateProfessional} spacing={3} sx={{ mt: 1 }}>
+          <TextField name="bio" label="Descripción breve" multiline rows={3} fullWidth />
+
+          <Box>
+            <Typography variant="subtitle2" gutterBottom>
+              Oficios
+            </Typography>
+            <FormGroup row>
+              {trades?.map((trade) => (
+                <FormControlLabel
+                  key={trade.id}
+                  sx={{ width: "48%" }}
+                  control={<Checkbox name="trade_ids" value={trade.id} />}
+                  label={trade.label}
+                />
+              ))}
+            </FormGroup>
+          </Box>
+
+          <Box>
+            <Typography variant="subtitle2" gutterBottom>
+              Radio de actuación
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1.5 }}>
+              Sin mapa todavía: elige hasta qué nivel quieres acotar dónde trabajas. Puedes
+              dejarlo en &quot;Toda España&quot; si te desplazas a cualquier sitio.
+            </Typography>
+            <Stack spacing={2.5}>
+              <OptionalLocationFields />
+            </Stack>
+          </Box>
+
+          <SubmitButton pendingText="Activando...">Activar</SubmitButton>
+        </Stack>
+      </Paper>
+    </Box>
   );
 }

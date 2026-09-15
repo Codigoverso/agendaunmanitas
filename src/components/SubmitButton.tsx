@@ -1,25 +1,24 @@
 "use client";
 
 import { useFormStatus } from "react-dom";
+import Button, { ButtonProps } from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export function SubmitButton({
   children,
   pendingText = "Guardando...",
-  className = "",
-}: {
-  children: React.ReactNode;
-  pendingText?: string;
-  className?: string;
-}) {
+  ...props
+}: ButtonProps & { pendingText?: string }) {
   const { pending } = useFormStatus();
   return (
-    <button
+    <Button
       type="submit"
+      variant="contained"
       disabled={pending}
-      aria-busy={pending}
-      className={`${className} disabled:cursor-not-allowed disabled:opacity-60`}
+      startIcon={pending ? <CircularProgress size={16} color="inherit" /> : undefined}
+      {...props}
     >
       {pending ? pendingText : children}
-    </button>
+    </Button>
   );
 }

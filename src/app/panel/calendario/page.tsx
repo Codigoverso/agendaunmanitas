@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { toggleBlockedSlot } from "../actions";
 import { CalendarSlotButton } from "@/components/CalendarSlotButton";
+import { LinkButton } from "@/components/LinkButton";
 import {
   WEEKDAY_SHORT,
   isoWeekday,
@@ -13,6 +13,9 @@ import {
   halfHourSlots,
   timeInRange,
 } from "@/lib/dates";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
 
 const GRID_START_HOUR = 7;
 const GRID_END_HOUR = 21;
@@ -57,49 +60,60 @@ export default async function CalendarioPage({
   const slots = halfHourSlots(GRID_START_HOUR, GRID_END_HOUR);
 
   return (
-    <div>
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-zinc-900">Calendario</h1>
-        <div className="flex gap-2 text-sm">
-          <Link
-            href={`/panel/calendario?week=${shiftWeek(monday, -1)}`}
-            className="rounded-md border border-zinc-300 px-2 py-1 text-zinc-600 hover:bg-zinc-50"
-          >
+    <Box>
+      <Stack
+        direction="row"
+        sx={{ alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 1 }}
+      >
+        <Typography variant="h4" sx={{ fontWeight: 600 }}>
+          Calendario
+        </Typography>
+        <Stack direction="row" spacing={1}>
+          <LinkButton href={`/panel/calendario?week=${shiftWeek(monday, -1)}`} size="small" variant="outlined">
             ← Semana anterior
-          </Link>
-          <Link
-            href={`/panel/calendario?week=${shiftWeek(monday, 1)}`}
-            className="rounded-md border border-zinc-300 px-2 py-1 text-zinc-600 hover:bg-zinc-50"
-          >
+          </LinkButton>
+          <LinkButton href={`/panel/calendario?week=${shiftWeek(monday, 1)}`} size="small" variant="outlined">
             Semana siguiente →
-          </Link>
-        </div>
-      </div>
-      <p className="mt-1 text-sm text-zinc-600">
+          </LinkButton>
+        </Stack>
+      </Stack>
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
         {formatDayMonth(dates[0])} – {formatDayMonth(dates[6])}. Verde = disponible, gris = fuera
         de horario, rojo = marcado como ocupado. Pulsa un hueco para cambiarlo.
-      </p>
+      </Typography>
 
-      <div className="mt-4 overflow-x-auto">
-        <table className="w-full min-w-[640px] border-collapse text-xs">
-          <thead>
-            <tr>
-              <th className="w-14"></th>
+      <Box sx={{ mt: 2, overflowX: "auto" }}>
+        <Box
+          component="table"
+          sx={{
+            width: "100%",
+            minWidth: 640,
+            borderCollapse: "collapse",
+            fontSize: 12,
+          }}
+        >
+          <Box component="thead">
+            <Box component="tr">
+              <Box component="th" sx={{ width: 56 }} />
               {dates.map((date) => (
-                <th key={date} className="pb-1 text-center font-medium text-zinc-700">
+                <Box
+                  component="th"
+                  key={date}
+                  sx={{ pb: 0.5, textAlign: "center", fontWeight: 600, color: "text.primary" }}
+                >
                   {WEEKDAY_SHORT[isoWeekday(date)]}
                   <br />
                   {formatDayMonth(date)}
-                </th>
+                </Box>
               ))}
-            </tr>
-          </thead>
-          <tbody>
+            </Box>
+          </Box>
+          <Box component="tbody">
             {slots.map((time) => (
-              <tr key={time}>
-                <td className="pr-1 text-right align-top text-zinc-400">
+              <Box component="tr" key={time}>
+                <Box component="td" sx={{ pr: 1, textAlign: "right", verticalAlign: "top", color: "text.disabled" }}>
                   {time.endsWith(":00") ? time : ""}
-                </td>
+                </Box>
                 {dates.map((date) => {
                   const dow = isoWeekday(date);
                   const daySchedule = weeklyByDay.get(dow);
@@ -108,26 +122,34 @@ export default async function CalendarioPage({
 
                   if (!working) {
                     return (
-                      <td key={date} className="border border-zinc-100 bg-zinc-50 p-0">
-                        <div className="h-4 w-full" />
-                      </td>
+                      <Box
+                        component="td"
+                        key={date}
+                        sx={{ border: "1px solid", borderColor: "grey.100", bgcolor: "grey.50", p: 0 }}
+                      >
+                        <Box sx={{ height: 16, width: "100%" }} />
+                      </Box>
                     );
                   }
 
                   const isBlocked = blockedSet.has(`${date}_${time}`);
                   return (
-                    <td key={date} className="border border-zinc-100 p-0">
+                    <Box
+                      component="td"
+                      key={date}
+                      sx={{ border: "1px solid", borderColor: "grey.100", p: 0 }}
+                    >
                       <form action={toggleBlockedSlot.bind(null, date, time, isBlocked)}>
                         <CalendarSlotButton isBlocked={isBlocked} time={time} />
                       </form>
-                    </td>
+                    </Box>
                   );
                 })}
-              </tr>
+              </Box>
             ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
   );
 }

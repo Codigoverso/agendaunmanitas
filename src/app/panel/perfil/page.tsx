@@ -4,6 +4,24 @@ import { uploadAvatar } from "../actions";
 import { firstOf, coverageLabel } from "@/lib/professional";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+
+function InfoRow({ label, value }: { label: string; value?: string }) {
+  return (
+    <Stack direction="row" spacing={1}>
+      <Typography variant="body2" color="text.primary" sx={{ fontWeight: 600 }}>
+        {label}:
+      </Typography>
+      <Typography variant="body2" color="text.secondary">
+        {value}
+      </Typography>
+    </Stack>
+  );
+}
 
 export default async function PerfilPage({
   searchParams,
@@ -37,67 +55,71 @@ export default async function PerfilPage({
     : { data: null };
 
   return (
-    <div>
-      <h1 className="text-2xl font-semibold text-zinc-900">Tu perfil</h1>
+    <Box>
+      <Typography variant="h4" sx={{ fontWeight: 600 }}>
+        Tu perfil
+      </Typography>
 
-      <div className="mt-4">
+      <Box sx={{ mt: 2 }}>
         <Notice type="success">{message}</Notice>
         <Notice type="error">{error}</Notice>
-      </div>
+      </Box>
 
-      <section className="mt-6">
-        <h2 className="text-sm font-medium text-zinc-700">Foto de perfil</h2>
-        <form action={uploadAvatar} className="mt-2 flex flex-wrap items-center gap-3">
-          <input type="file" name="avatar" accept="image/*" required className="text-sm" />
-          <SubmitButton
-            pendingText="Subiendo..."
-            className="rounded-md bg-teal-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-teal-800"
+      <Card variant="outlined" sx={{ mt: 3 }}>
+        <CardContent>
+          <Typography variant="subtitle2" gutterBottom>
+            Foto de perfil
+          </Typography>
+          <Stack
+            component="form"
+            action={uploadAvatar}
+            direction="row"
+            spacing={2}
+            sx={{ mt: 1, alignItems: "center", flexWrap: "wrap" }}
           >
-            Subir
-          </SubmitButton>
-        </form>
-      </section>
+            <input type="file" name="avatar" accept="image/*" required />
+            <SubmitButton pendingText="Subiendo...">Subir</SubmitButton>
+          </Stack>
+        </CardContent>
+      </Card>
 
-      <section className="mt-8">
-        <h2 className="text-sm font-medium text-zinc-700">Datos personales</h2>
-        <dl className="mt-2 flex flex-col gap-1 text-sm text-zinc-600">
-          <div className="flex gap-2">
-            <dt className="font-medium text-zinc-800">Nombre:</dt>
-            <dd>{profile?.full_name}</dd>
-          </div>
-          <div className="flex gap-2">
-            <dt className="font-medium text-zinc-800">Ubicación:</dt>
-            <dd>{[profile?.city, profile?.province, profile?.region].filter(Boolean).join(", ")}</dd>
-          </div>
-        </dl>
-      </section>
+      <Card variant="outlined" sx={{ mt: 3 }}>
+        <CardContent>
+          <Typography variant="subtitle2" gutterBottom>
+            Datos personales
+          </Typography>
+          <Stack spacing={0.5} sx={{ mt: 1 }}>
+            <InfoRow label="Nombre" value={profile?.full_name} />
+            <InfoRow
+              label="Ubicación"
+              value={[profile?.city, profile?.province, profile?.region].filter(Boolean).join(", ")}
+            />
+          </Stack>
+        </CardContent>
+      </Card>
 
       {professional && (
-        <section className="mt-8">
-          <h2 className="text-sm font-medium text-zinc-700">Como profesional</h2>
-          <dl className="mt-2 flex flex-col gap-1 text-sm text-zinc-600">
-            <div className="flex gap-2">
-              <dt className="font-medium text-zinc-800">Oficios:</dt>
-              <dd>
-                {trades
-                  ?.map((t) => firstOf(t.trades)?.label)
-                  .filter(Boolean)
-                  .join(", ") || "—"}
-              </dd>
-            </div>
-            <div className="flex gap-2">
-              <dt className="font-medium text-zinc-800">Cobertura:</dt>
-              <dd>{coverageLabel(professional)}</dd>
-            </div>
-            {professional.bio && (
-              <div className="flex gap-2">
-                <dt className="font-medium text-zinc-800">Descripción:</dt>
-                <dd>{professional.bio}</dd>
-              </div>
-            )}
-          </dl>
-        </section>
+        <Card variant="outlined" sx={{ mt: 3 }}>
+          <CardContent>
+            <Typography variant="subtitle2" gutterBottom>
+              Como profesional
+            </Typography>
+            <Stack spacing={0.5} sx={{ mt: 1 }}>
+              <InfoRow
+                label="Oficios"
+                value={
+                  trades
+                    ?.map((t) => firstOf(t.trades)?.label)
+                    .filter(Boolean)
+                    .join(", ") || "—"
+                }
+              />
+              <InfoRow label="Cobertura" value={coverageLabel(professional)} />
+              {professional.bio && <InfoRow label="Descripción" value={professional.bio} />}
+            </Stack>
+          </CardContent>
+        </Card>
       )}
-    </div>
+    </Box>
   );
 }

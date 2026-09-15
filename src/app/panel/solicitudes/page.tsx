@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 
 export default async function SolicitudesPage() {
   const supabase = await createClient();
@@ -16,9 +18,13 @@ export default async function SolicitudesPage() {
   if (!professional) redirect("/panel/perfil");
 
   return (
-    <div>
-      <h1 className="text-2xl font-semibold text-zinc-900">Solicitudes</h1>
-      <p className="mt-2 text-sm text-zinc-500">Todavía no has recibido ninguna solicitud.</p>
-    </div>
+    <Box>
+      <Typography variant="h4" sx={{ fontWeight: 600 }}>
+        Solicitudes
+      </Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+        Todavía no has recibido ninguna solicitud.
+      </Typography>
+    </Box>
   );
 }

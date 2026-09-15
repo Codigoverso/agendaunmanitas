@@ -1,7 +1,12 @@
-import Link from "next/link";
 import { signIn } from "@/app/auth/actions";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
+import { LinkText } from "@/components/LinkText";
+import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
+import TextField from "@mui/material/TextField";
+import Stack from "@mui/material/Stack";
 
 export default async function LoginPage({
   searchParams,
@@ -11,54 +16,43 @@ export default async function LoginPage({
   const { error, message } = await searchParams;
 
   return (
-    <div className="flex flex-1 items-center justify-center px-4 py-16">
-      <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-semibold text-zinc-900">Entrar</h1>
-        <p className="mt-1 text-sm text-zinc-600">
+    <Box
+      sx={{
+        display: "flex",
+        flexGrow: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        px: 2,
+        py: 8,
+        bgcolor: "background.default",
+      }}
+    >
+      <Paper elevation={0} variant="outlined" sx={{ width: "100%", maxWidth: 400, p: 4 }}>
+        <Typography variant="h5" sx={{ fontWeight: 600 }}>
+          Entrar
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
           Accede a tu cuenta de AgendaUnManitas.
-        </p>
+        </Typography>
 
-        <Notice type="success">{message}</Notice>
-        <Notice type="error">{error}</Notice>
+        <Box sx={{ mt: 3 }}>
+          <Notice type="success">{message}</Notice>
+          <Notice type="error">{error}</Notice>
+        </Box>
 
-        <form action={signIn} className="mt-6 flex flex-col gap-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-zinc-700">
-              Email
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none"
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-zinc-700">
-              Contraseña
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              minLength={6}
-              className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none"
-            />
-          </div>
-          <SubmitButton className="mt-2 rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800">
-            Entrar
-          </SubmitButton>
-        </form>
+        <Stack component="form" action={signIn} spacing={2.5} sx={{ mt: 1 }}>
+          <TextField name="email" type="email" label="Email" required fullWidth />
+          <TextField name="password" type="password" label="Contraseña" required fullWidth slotProps={{ htmlInput: { minLength: 6 } }} />
+          <SubmitButton>Entrar</SubmitButton>
+        </Stack>
 
-        <p className="mt-6 text-sm text-zinc-600">
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 3 }}>
           ¿No tienes cuenta?{" "}
-          <Link href="/registro" className="font-medium text-teal-700 hover:underline">
+          <LinkText href="/registro" sx={{ fontWeight: 500 }}>
             Regístrate
-          </Link>
-        </p>
-      </div>
-    </div>
+          </LinkText>
+        </Typography>
+      </Paper>
+    </Box>
   );
 }

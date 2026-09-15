@@ -1,6 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
 import {
   AUTONOMOUS_COMMUNITIES,
   PROVINCES_BY_COMMUNITY,
@@ -38,68 +42,65 @@ export function OptionalLocationFields({
 
   return (
     <>
-      <div>
-        <label htmlFor="region" className="block text-sm font-medium text-zinc-700">
-          {regionLabel}
-        </label>
-        <select
-          id="region"
+      <FormControl fullWidth>
+        <InputLabel id="region-label">{regionLabel}</InputLabel>
+        <Select
+          labelId="region-label"
           name="region"
+          label={regionLabel}
           value={region}
           onChange={(e) => {
             setRegion(e.target.value);
             setProvince("");
           }}
-          className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none"
         >
-          <option value="">{regionAnyLabel}</option>
+          <MenuItem value="">{regionAnyLabel}</MenuItem>
           {AUTONOMOUS_COMMUNITIES.map((c) => (
-            <option key={c} value={c}>
+            <MenuItem key={c} value={c}>
               {c}
-            </option>
+            </MenuItem>
           ))}
-        </select>
-      </div>
+        </Select>
+      </FormControl>
+
       {region && (
-        <div>
-          <label htmlFor="province" className="block text-sm font-medium text-zinc-700">
-            {provinceLabel}
-          </label>
-          <select
-            id="province"
+        <FormControl fullWidth>
+          <InputLabel id="province-label">{provinceLabel}</InputLabel>
+          <Select
+            labelId="province-label"
             name="province"
+            label={provinceLabel}
             value={province}
             onChange={(e) => setProvince(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none"
           >
-            <option value="">{provinceAnyLabel}</option>
+            <MenuItem value="">{provinceAnyLabel}</MenuItem>
             {provinces.map((p) => (
-              <option key={p} value={p}>
+              <MenuItem key={p} value={p}>
                 {p}
-              </option>
+              </MenuItem>
             ))}
-          </select>
-        </div>
+          </Select>
+        </FormControl>
       )}
+
       {province && (
-        <div>
-          <label htmlFor="city" className="block text-sm font-medium text-zinc-700">
-            {cityLabel}
-          </label>
-          <select
-            id="city"
+        <FormControl fullWidth>
+          <InputLabel id="city-label">{cityLabel}</InputLabel>
+          <Select
+            key={province}
+            labelId="city-label"
             name="city"
+            label={cityLabel}
             defaultValue={defaultCity}
-            className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none"
           >
-            <option value="">{cityAnyLabel}</option>
+            <MenuItem value="">{cityAnyLabel}</MenuItem>
             {municipalities.map((m) => (
-              <option key={m} value={m}>
+              <MenuItem key={m} value={m}>
                 {m}
-              </option>
+              </MenuItem>
             ))}
-          </select>
-        </div>
+          </Select>
+        </FormControl>
       )}
     </>
   );

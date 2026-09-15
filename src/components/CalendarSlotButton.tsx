@@ -1,21 +1,22 @@
 "use client";
 
 import { useFormStatus } from "react-dom";
+import ButtonBase from "@mui/material/ButtonBase";
 
 export function CalendarSlotButton({ isBlocked, time }: { isBlocked: boolean; time: string }) {
   const { pending } = useFormStatus();
   return (
-    <button
+    <ButtonBase
       type="submit"
       disabled={pending}
       title={`${time} · ${isBlocked ? "Ocupado" : "Disponible"}`}
-      className={`h-4 w-full ${
-        pending
-          ? "animate-pulse bg-zinc-200"
-          : isBlocked
-            ? "bg-red-100 hover:bg-red-200"
-            : "bg-teal-100 hover:bg-teal-200"
-      }`}
+      sx={{
+        display: "block",
+        width: "100%",
+        height: 16,
+        bgcolor: pending ? "grey.200" : isBlocked ? "error.light" : "secondary.light",
+        "&:hover": { bgcolor: pending ? undefined : isBlocked ? "error.main" : "secondary.main" },
+      }}
     />
   );
 }

@@ -1,8 +1,13 @@
-import Link from "next/link";
 import { signUp } from "@/app/auth/actions";
 import { LocationFields } from "@/components/LocationFields";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
+import { LinkText } from "@/components/LinkText";
+import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
+import TextField from "@mui/material/TextField";
+import Stack from "@mui/material/Stack";
 
 export default async function SignupPage({
   searchParams,
@@ -12,67 +17,51 @@ export default async function SignupPage({
   const { error } = await searchParams;
 
   return (
-    <div className="flex flex-1 items-center justify-center px-4 py-16">
-      <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-semibold text-zinc-900">Crear cuenta</h1>
-        <p className="mt-1 text-sm text-zinc-600">
-          Como cliente o como profesional — puedes activar el modo profesional
-          más adelante.
-        </p>
+    <Box
+      sx={{
+        display: "flex",
+        flexGrow: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        px: 2,
+        py: 8,
+        bgcolor: "background.default",
+      }}
+    >
+      <Paper elevation={0} variant="outlined" sx={{ width: "100%", maxWidth: 420, p: 4 }}>
+        <Typography variant="h5" sx={{ fontWeight: 600 }}>
+          Crear cuenta
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+          Como cliente o como profesional — puedes activar el modo profesional más adelante.
+        </Typography>
 
-        <Notice type="error">{error}</Notice>
+        <Box sx={{ mt: 3 }}>
+          <Notice type="error">{error}</Notice>
+        </Box>
 
-        <form action={signUp} className="mt-6 flex flex-col gap-4">
-          <div>
-            <label htmlFor="full_name" className="block text-sm font-medium text-zinc-700">
-              Nombre
-            </label>
-            <input
-              id="full_name"
-              name="full_name"
-              type="text"
-              required
-              className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none"
-            />
-          </div>
+        <Stack component="form" action={signUp} spacing={2.5} sx={{ mt: 1 }}>
+          <TextField name="full_name" label="Nombre" required fullWidth />
           <LocationFields />
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-zinc-700">
-              Email
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none"
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-zinc-700">
-              Contraseña
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              minLength={6}
-              className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none"
-            />
-          </div>
-          <SubmitButton className="mt-2 rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800">
-            Crear cuenta
-          </SubmitButton>
-        </form>
+          <TextField name="email" type="email" label="Email" required fullWidth />
+          <TextField
+            name="password"
+            type="password"
+            label="Contraseña"
+            required
+            fullWidth
+            slotProps={{ htmlInput: { minLength: 6 } }}
+          />
+          <SubmitButton>Crear cuenta</SubmitButton>
+        </Stack>
 
-        <p className="mt-6 text-sm text-zinc-600">
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 3 }}>
           ¿Ya tienes cuenta?{" "}
-          <Link href="/entrar" className="font-medium text-teal-700 hover:underline">
+          <LinkText href="/entrar" sx={{ fontWeight: 500 }}>
             Entra
-          </Link>
-        </p>
-      </div>
-    </div>
+          </LinkText>
+        </Typography>
+      </Paper>
+    </Box>
   );
 }

@@ -1,35 +1,40 @@
-import Link from "next/link";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
+import { LinkButton } from "@/components/LinkButton";
 
 export default function Home() {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 px-6 text-center">
-      <h1 className="text-4xl font-semibold tracking-tight text-zinc-900">
+    <Box
+      sx={{
+        display: "flex",
+        flexGrow: 1,
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        px: 3,
+        textAlign: "center",
+        bgcolor: "background.default",
+      }}
+    >
+      <Typography variant="h3" color="text.primary" sx={{ fontWeight: 600 }}>
         AgendaUnManitas
-      </h1>
-      <p className="mt-4 max-w-md text-lg text-zinc-600">
-        Encuentra un profesional según su disponibilidad real — no una lista
-        de contactos a ciegas.
-      </p>
-      <div className="mt-8 flex gap-3">
-        <Link
-          href="/buscar"
-          className="rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800"
-        >
+      </Typography>
+      <Typography variant="h6" color="text.secondary" sx={{ mt: 2, maxWidth: 480 }}>
+        Encuentra un profesional según su disponibilidad real — no una lista de contactos a
+        ciegas.
+      </Typography>
+      <Stack direction="row" spacing={2} sx={{ mt: 4 }}>
+        <LinkButton href="/buscar" variant="contained" size="large">
           Buscar profesional
-        </Link>
-        <Link
-          href="/registro"
-          className="rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-white"
-        >
+        </LinkButton>
+        <LinkButton href="/registro" variant="outlined" size="large">
           Crear cuenta
-        </Link>
-        <Link
-          href="/entrar"
-          className="rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-white"
-        >
+        </LinkButton>
+        <LinkButton href="/entrar" variant="outlined" size="large">
           Entrar
-        </Link>
-      </div>
-    </div>
+        </LinkButton>
+      </Stack>
+    </Box>
   );
 }
