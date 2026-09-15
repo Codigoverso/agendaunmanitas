@@ -29,16 +29,6 @@ type FeaturedProfessional = {
 export default async function Home() {
   const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const { data: profile } = user
-    ? await supabase.from("profiles").select("full_name, avatar_url").eq("id", user.id).single()
-    : { data: null };
-
-  const displayName = profile?.full_name || user?.email || "";
-
   const { data: trades } = await supabase.from("trades").select("id, slug, label").order("id");
 
   const { data: featured } = await supabase
@@ -51,48 +41,6 @@ export default async function Home() {
 
   return (
     <Box sx={{ bgcolor: "background.default" }}>
-      {/* Cabecera */}
-      <Box sx={{ borderBottom: "1px solid", borderColor: "divider", bgcolor: "#fff" }}>
-        <Container maxWidth="lg">
-          <Stack
-            direction="row"
-            sx={{ py: 1.5, alignItems: "center", justifyContent: "space-between", gap: 2 }}
-          >
-            <Typography variant="h6" color="primary.main" sx={{ fontWeight: 700 }}>
-              AgendaUnManitas
-            </Typography>
-            <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-              <LinkText href="/buscar" underline="none" sx={{ fontWeight: 500, display: { xs: "none", sm: "inline" } }}>
-                Buscar profesional
-              </LinkText>
-              {user ? (
-                <LinkText
-                  href="/panel/perfil"
-                  underline="none"
-                  sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.primary" }}
-                >
-                  <Avatar src={profile?.avatar_url ?? undefined} sx={{ width: 32, height: 32, fontSize: 15 }}>
-                    {displayName.charAt(0).toUpperCase()}
-                  </Avatar>
-                  <Typography variant="body2" sx={{ fontWeight: 500, display: { xs: "none", sm: "block" } }}>
-                    {displayName}
-                  </Typography>
-                </LinkText>
-              ) : (
-                <>
-                  <LinkButton href="/entrar" variant="text">
-                    Entrar
-                  </LinkButton>
-                  <LinkButton href="/registro" variant="contained">
-                    Crear cuenta
-                  </LinkButton>
-                </>
-              )}
-            </Stack>
-          </Stack>
-        </Container>
-      </Box>
-
       {/* Hero con buscador, al estilo de la portada de Wallapop */}
       <Box
         sx={{
