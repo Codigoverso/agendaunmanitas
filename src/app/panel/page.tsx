@@ -10,7 +10,7 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect("/entrar");
   }
 
   const { data: profile } = await supabase
@@ -26,7 +26,7 @@ export default async function DashboardPage() {
       </h1>
       {profile?.city && <p className="mt-1 text-sm text-zinc-600">{profile.city}</p>}
       <Link
-        href="/professional"
+        href="/profesional"
         className="mt-6 rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800"
       >
         Modo profesional

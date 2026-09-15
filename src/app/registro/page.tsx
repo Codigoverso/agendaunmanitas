@@ -82,7 +82,7 @@ export default async function SignupPage({
 
         <p className="mt-6 text-sm text-zinc-600">
           ¿Ya tienes cuenta?{" "}
-          <Link href="/login" className="font-medium text-teal-700 hover:underline">
+          <Link href="/entrar" className="font-medium text-teal-700 hover:underline">
             Entra
           </Link>
         </p>

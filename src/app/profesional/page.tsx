@@ -17,7 +17,7 @@ export default async function ProfessionalPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!user) redirect("/entrar");
 
   const { data: trades } = await supabase.from("trades").select("id, label").order("id");
 
