@@ -32,7 +32,9 @@ export default async function AdminPage({
 
   const { data: unclaimed } = await supabase
     .from("professional_profiles")
-    .select("id, full_name, coverage_city, coverage_region, professional_trades(trades(label))")
+    .select(
+      "id, full_name, coverage_city, coverage_region, contact_email, contact_phone, professional_trades(trades(label))"
+    )
     .eq("claimed", false)
     .order("id");
 
@@ -42,8 +44,11 @@ export default async function AdminPage({
         Directorio de negocios (sin reclamar)
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-        Estos negocios se muestran en la búsqueda marcados como &quot;no registrado&quot; y sin
-        vía de contacto — sirven solo para no arrancar con la base de datos vacía.
+        Estos negocios se muestran en la búsqueda marcados como &quot;no registrado&quot; —
+        sirven solo para no arrancar con la base de datos vacía. Puedes añadir un teléfono o
+        email de referencia (por ejemplo, encontrado en Google) aunque el negocio no tenga
+        cuenta: se mostrará igualmente, dejando claro que no está verificado ni gestionado desde
+        la plataforma.
       </Typography>
 
       <Box sx={{ mt: 2 }}>
@@ -82,6 +87,16 @@ export default async function AdminPage({
                 <OptionalLocationFields />
               </Stack>
             </Box>
+            <Box>
+              <Typography variant="subtitle2" gutterBottom>
+                Contacto de referencia (opcional, sin verificar)
+              </Typography>
+              <Stack spacing={2.5}>
+                <TextField name="contact_email" type="email" label="Email" fullWidth />
+                <TextField name="contact_phone" type="tel" label="Teléfono" fullWidth />
+                <TextField name="contact_address" label="Dirección" fullWidth />
+              </Stack>
+            </Box>
             <SubmitButton sx={{ alignSelf: "flex-start" }}>Añadir</SubmitButton>
           </Stack>
         </CardContent>
@@ -111,6 +126,11 @@ export default async function AdminPage({
                   <Typography variant="body2" color="text.secondary">
                     {tradeLabels || "Sin oficios"} · {biz.coverage_city || biz.coverage_region || "Toda España"}
                   </Typography>
+                  {(biz.contact_email || biz.contact_phone) && (
+                    <Typography variant="caption" color="text.secondary">
+                      {[biz.contact_email, biz.contact_phone].filter(Boolean).join(" · ")}
+                    </Typography>
+                  )}
                 </Box>
                 <Chip size="small" label="No registrado" color="default" />
               </CardContent>

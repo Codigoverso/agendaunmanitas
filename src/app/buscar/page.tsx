@@ -162,8 +162,8 @@ export default async function SearchPage({
                   </Stack>
                   {!pro.claimed && (
                     <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
-                      Este negocio todavía no se ha dado de alta en AgendaUnManitas — no se puede
-                      contactar con él a través de la plataforma.
+                      Este negocio todavía no se ha dado de alta en AgendaUnManitas — el contacto
+                      (si aparece) es de referencia y no está verificado ni gestionado por él.
                     </Typography>
                   )}
                   {pro.bio && (
@@ -183,7 +183,7 @@ export default async function SearchPage({
                       {schedule.end_time.slice(0, 5)} ({slots.length} huecos de media hora)
                     </Typography>
                   )}
-                  {pro.claimed && (pro.contact_email || pro.contact_phone || pro.contact_address) && (
+                  {(pro.contact_email || pro.contact_phone || pro.contact_address) && (
                     <Stack spacing={0.5} sx={{ mt: 1.5 }}>
                       {pro.contact_email && (
                         <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
