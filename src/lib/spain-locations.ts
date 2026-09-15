@@ -51,3 +51,9 @@ export const PROVINCES_BY_COMMUNITY: Record<string, string[]> = {
   Ceuta: ["Ceuta"],
   Melilla: ["Melilla"],
 };
+
+// 8.132 municipios oficiales agrupados por provincia (fuente: INE, vía
+// codeforspain/ds-organizacion-administrativa, licencia de datos abiertos).
+import municipiosPorProvinciaRaw from "./data/municipios-por-provincia.json";
+
+export const MUNICIPALITIES_BY_PROVINCE: Record<string, string[]> = municipiosPorProvinciaRaw;
