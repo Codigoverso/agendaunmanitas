@@ -1,30 +1,19 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { uploadAvatar, updateTrades } from "../actions";
-import { coverageLabel } from "@/lib/professional";
+import { uploadAvatar, updateProfile, updateProfessionalInfo, updateTrades } from "../actions";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
+import { LocationFields } from "@/components/LocationFields";
+import { OptionalLocationFields } from "@/components/OptionalLocationFields";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
+import TextField from "@mui/material/TextField";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
-
-function InfoRow({ label, value }: { label: string; value?: string }) {
-  return (
-    <Stack direction="row" spacing={1}>
-      <Typography variant="body2" color="text.primary" sx={{ fontWeight: 600 }}>
-        {label}:
-      </Typography>
-      <Typography variant="body2" color="text.secondary">
-        {value}
-      </Typography>
-    </Stack>
-  );
-}
 
 export default async function PerfilPage({
   searchParams,
@@ -94,12 +83,14 @@ export default async function PerfilPage({
           <Typography variant="subtitle2" gutterBottom>
             Datos personales
           </Typography>
-          <Stack spacing={0.5} sx={{ mt: 1 }}>
-            <InfoRow label="Nombre" value={profile?.full_name} />
-            <InfoRow
-              label="Ubicación"
-              value={[profile?.city, profile?.province, profile?.region].filter(Boolean).join(", ")}
+          <Stack component="form" action={updateProfile} spacing={2.5} sx={{ mt: 1 }}>
+            <TextField name="full_name" label="Nombre" defaultValue={profile?.full_name} required fullWidth />
+            <LocationFields
+              defaultRegion={profile?.region ?? ""}
+              defaultProvince={profile?.province ?? ""}
+              defaultCity={profile?.city ?? ""}
             />
+            <SubmitButton sx={{ alignSelf: "flex-start" }}>Guardar datos personales</SubmitButton>
           </Stack>
         </CardContent>
       </Card>
@@ -111,9 +102,24 @@ export default async function PerfilPage({
               <Typography variant="subtitle2" gutterBottom>
                 Como profesional
               </Typography>
-              <Stack spacing={0.5} sx={{ mt: 1 }}>
-                <InfoRow label="Cobertura" value={coverageLabel(professional)} />
-                {professional.bio && <InfoRow label="Descripción" value={professional.bio} />}
+              <Stack component="form" action={updateProfessionalInfo} spacing={2.5} sx={{ mt: 1 }}>
+                <TextField
+                  name="bio"
+                  label="Descripción breve"
+                  defaultValue={professional.bio ?? ""}
+                  multiline
+                  rows={3}
+                  fullWidth
+                />
+                <Typography variant="caption" color="text.secondary">
+                  Radio de actuación — deja un nivel en blanco para no acotar a partir de ahí.
+                </Typography>
+                <OptionalLocationFields
+                  defaultRegion={professional.coverage_region ?? ""}
+                  defaultProvince={professional.coverage_province ?? ""}
+                  defaultCity={professional.coverage_city ?? ""}
+                />
+                <SubmitButton sx={{ alignSelf: "flex-start" }}>Guardar</SubmitButton>
               </Stack>
             </CardContent>
           </Card>

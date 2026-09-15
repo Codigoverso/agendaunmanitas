@@ -9,11 +9,15 @@ import { AUTONOMOUS_COMMUNITIES, PROVINCES_BY_COMMUNITY, MUNICIPALITIES_BY_PROVI
 
 export function LocationFields({
   defaultRegion = "",
+  defaultProvince = "",
+  defaultCity = "",
 }: {
   defaultRegion?: string;
+  defaultProvince?: string;
+  defaultCity?: string;
 }) {
   const [region, setRegion] = useState(defaultRegion);
-  const [province, setProvince] = useState("");
+  const [province, setProvince] = useState(defaultProvince);
   const provinces = region ? (PROVINCES_BY_COMMUNITY[region] ?? []) : [];
   const municipalities = province ? (MUNICIPALITIES_BY_PROVINCE[province] ?? []) : [];
 
@@ -65,7 +69,13 @@ export function LocationFields({
 
       <FormControl fullWidth required disabled={!province}>
         <InputLabel id="city-label">Población</InputLabel>
-        <Select key={province} labelId="city-label" name="city" label="Población" defaultValue="">
+        <Select
+          key={province}
+          labelId="city-label"
+          name="city"
+          label="Población"
+          defaultValue={defaultCity}
+        >
           {municipalities.map((m) => (
             <MenuItem key={m} value={m}>
               {m}

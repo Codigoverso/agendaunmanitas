@@ -64,6 +64,57 @@ export async function setWeeklyAvailability(formData: FormData) {
   redirect(`/panel/horario?message=${encodeURIComponent("Horario guardado.")}`);
 }
 
+export async function updateProfile(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/entrar");
+
+  const full_name = String(formData.get("full_name") || "");
+  const city = String(formData.get("city") || "");
+  const province = String(formData.get("province") || "");
+  const region = String(formData.get("region") || "");
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ full_name, city, province, region })
+    .eq("id", user.id);
+
+  if (error) {
+    redirect(`/panel/perfil?error=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidatePath("/panel", "layout");
+  redirect(`/panel/perfil?message=${encodeURIComponent("Datos personales actualizados.")}`);
+}
+
+export async function updateProfessionalInfo(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/entrar");
+
+  const bio = String(formData.get("bio") || "");
+  const coverage_city = String(formData.get("city") || "") || null;
+  const coverage_province = String(formData.get("province") || "") || null;
+  const coverage_region = String(formData.get("region") || "") || null;
+
+  const { error } = await supabase
+    .from("professional_profiles")
+    .update({ bio, coverage_city, coverage_province, coverage_region })
+    .eq("id", user.id);
+
+  if (error) {
+    redirect(`/panel/perfil?error=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidatePath("/panel/perfil");
+  revalidatePath("/buscar");
+  redirect(`/panel/perfil?message=${encodeURIComponent("Datos de profesional actualizados.")}`);
+}
+
 export async function updateTrades(formData: FormData) {
   const supabase = await createClient();
   const {
