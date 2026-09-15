@@ -4,9 +4,9 @@ import { signIn } from "@/app/auth/actions";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; message?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, message } = await searchParams;
 
   return (
     <div className="flex flex-1 items-center justify-center px-4 py-16">
@@ -15,6 +15,12 @@ export default async function LoginPage({
         <p className="mt-1 text-sm text-zinc-600">
           Accede a tu cuenta de AgendaUnManitas.
         </p>
+
+        {message && (
+          <p className="mt-4 rounded-md bg-teal-50 px-3 py-2 text-sm text-teal-800">
+            {message}
+          </p>
+        )}
 
         {error && (
           <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">

@@ -14,7 +14,7 @@ export async function signUp(formData: FormData) {
   const region = String(formData.get("region"));
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: { data: { full_name: fullName, city, province, region } },
@@ -37,6 +37,16 @@ export async function signUp(formData: FormData) {
       // El email de bienvenida es un extra, no debe bloquear el registro.
       console.error("No se pudo enviar el email de bienvenida:", err);
     }
+  }
+
+  // Si el proyecto de Supabase exige confirmar el email, signUp() no abre
+  // sesión todavía (data.session es null) — no tiene sentido mandar a /panel.
+  if (!data.session) {
+    redirect(
+      `/entrar?message=${encodeURIComponent(
+        "Cuenta creada. Revisa tu email y confirma tu cuenta antes de entrar."
+      )}`
+    );
   }
 
   redirect("/panel");
