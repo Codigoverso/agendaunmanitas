@@ -8,17 +8,23 @@ presupuesto a ciegas.
 
 - **Frontend**: Next.js (App Router) + Tailwind CSS
 - **Backend/datos**: Supabase (Postgres + Auth + Storage)
-- **Emails**: Resend (pendiente de integrar)
+- **Emails**: Resend (email de bienvenida al registrarse)
 
 ## Puesta en marcha
 
 1. Crea un proyecto en [supabase.com](https://supabase.com) (tier gratuito).
-2. Copia `.env.local.example` a `.env.local` y rellena:
+2. Crea una cuenta en [resend.com](https://resend.com) (tier gratuito, 100 emails/día)
+   y copia tu API key (Dashboard → API Keys).
+   - Sin verificar un dominio propio, Resend solo deja enviar al email con el
+     que te registraste en Resend — útil para probar, no sirve todavía para
+     usuarios reales. Verificar un dominio se hace en Resend → Domains.
+3. Copia `.env.local.example` a `.env.local` y rellena:
    - `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (Project Settings → API Keys en Supabase, clave "Publishable key")
-   - `RESEND_API_KEY` (cuando se integren los emails)
-3. Ejecuta el esquema inicial: abre el SQL Editor de tu proyecto de Supabase y
-   pega el contenido de `supabase/migrations/20260915000000_init_schema.sql`.
-4. Instala dependencias y arranca el servidor de desarrollo:
+   - `RESEND_API_KEY` (API Key de Resend)
+4. Ejecuta el esquema inicial: abre el SQL Editor de tu proyecto de Supabase y
+   pega el contenido de `supabase/migrations/20260915000000_init_schema.sql`
+   y de `supabase/migrations/20260915000100_profile_on_signup.sql`.
+5. Instala dependencias y arranca el servidor de desarrollo:
 
    ```bash
    npm install

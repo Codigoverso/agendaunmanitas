@@ -2,6 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getResendClient, EMAIL_FROM } from "@/lib/resend";
+import { welcomeEmailHtml } from "@/lib/emails/welcome";
 
 export async function signUp(formData: FormData) {
   const email = String(formData.get("email"));
@@ -18,6 +20,21 @@ export async function signUp(formData: FormData) {
 
   if (error) {
     redirect(`/registro?error=${encodeURIComponent(error.message)}`);
+  }
+
+  const resend = getResendClient();
+  if (resend) {
+    try {
+      await resend.emails.send({
+        from: EMAIL_FROM,
+        to: email,
+        subject: "Bienvenido a AgendaUnManitas",
+        html: welcomeEmailHtml(fullName),
+      });
+    } catch (err) {
+      // El email de bienvenida es un extra, no debe bloquear el registro.
+      console.error("No se pudo enviar el email de bienvenida:", err);
+    }
   }
 
   redirect("/panel");
