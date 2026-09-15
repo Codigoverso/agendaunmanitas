@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { OptionalLocationFields } from "@/components/OptionalLocationFields";
 
 const TIMEFRAME_LABEL: Record<string, string> = {
   morning: "Mañana",
@@ -7,7 +8,9 @@ const TIMEFRAME_LABEL: Record<string, string> = {
 
 type ProfessionalResult = {
   id: string;
-  city: string;
+  coverage_region: string | null;
+  coverage_province: string | null;
+  coverage_city: string | null;
   bio: string | null;
   profiles: { full_name: string } | { full_name: string }[] | null;
   professional_trades: { trade_id: number; trades: { label: string } | { label: string }[] | null }[];
@@ -18,12 +21,33 @@ function firstOf<T>(value: T | T[] | null): T | null {
   return Array.isArray(value) ? (value[0] ?? null) : value;
 }
 
+function coverageLabel(pro: ProfessionalResult) {
+  if (pro.coverage_city) return `${pro.coverage_city} (${pro.coverage_province})`;
+  if (pro.coverage_province) return `Toda la provincia de ${pro.coverage_province}`;
+  if (pro.coverage_region) return `Toda ${pro.coverage_region}`;
+  return "Toda España";
+}
+
+// Un profesional encaja si, en cada nivel que el cliente ha acotado, su
+// cobertura es "sin límite" ahí (null) o coincide exactamente.
+function matchesLocation(
+  pro: ProfessionalResult,
+  region?: string,
+  province?: string,
+  city?: string
+) {
+  if (region && pro.coverage_region && pro.coverage_region !== region) return false;
+  if (province && pro.coverage_province && pro.coverage_province !== province) return false;
+  if (city && pro.coverage_city && pro.coverage_city !== city) return false;
+  return true;
+}
+
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: Promise<{ trade?: string; city?: string; date?: string }>;
+  searchParams: Promise<{ trade?: string; region?: string; province?: string; city?: string; date?: string }>;
 }) {
-  const { trade, city, date } = await searchParams;
+  const { trade, region, province, city, date } = await searchParams;
   const supabase = await createClient();
 
   const { data: trades } = await supabase.from("trades").select("id, slug, label").order("id");
@@ -37,23 +61,25 @@ export default async function SearchPage({
 
   let query = supabase
     .from("professional_profiles")
-    .select(`id, city, bio, profiles(full_name), ${selectTrades}, ${selectSlots}`)
+    .select(
+      `id, coverage_region, coverage_province, coverage_city, bio, profiles(full_name), ${selectTrades}, ${selectSlots}`
+    )
     .eq("is_active", true);
 
-  if (city) query = query.ilike("city", `%${city}%`);
   if (trade) query = query.eq("professional_trades.trade_id", Number(trade));
   if (date) query = query.eq("availability_slots.date", date);
 
-  const { data: results, error } = await query.returns<ProfessionalResult[]>();
+  const { data: rawResults, error } = await query.returns<ProfessionalResult[]>();
+  const results = rawResults?.filter((pro) => matchesLocation(pro, region, province, city));
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-16">
       <h1 className="text-2xl font-semibold text-zinc-900">Buscar un profesional</h1>
       <p className="mt-1 text-sm text-zinc-600">
-        Filtra por oficio, ciudad y, si quieres, una fecha concreta.
+        Filtra por oficio, ubicación y, si quieres, una fecha concreta.
       </p>
 
-      <form className="mt-6 flex flex-wrap items-end gap-3">
+      <form className="mt-6 flex flex-col gap-4">
         <div>
           <label htmlFor="trade" className="block text-sm font-medium text-zinc-700">
             Oficio
@@ -72,18 +98,14 @@ export default async function SearchPage({
             ))}
           </select>
         </div>
-        <div>
-          <label htmlFor="city" className="block text-sm font-medium text-zinc-700">
-            Ciudad
-          </label>
-          <input
-            id="city"
-            name="city"
-            type="text"
-            defaultValue={city ?? ""}
-            className="mt-1 rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none"
-          />
-        </div>
+        <OptionalLocationFields
+          regionAnyLabel="Cualquier comunidad"
+          provinceAnyLabel="Cualquier provincia"
+          cityAnyLabel="Cualquier población"
+          defaultRegion={region ?? ""}
+          defaultProvince={province ?? ""}
+          defaultCity={city ?? ""}
+        />
         <div>
           <label htmlFor="date" className="block text-sm font-medium text-zinc-700">
             Fecha
@@ -98,7 +120,7 @@ export default async function SearchPage({
         </div>
         <button
           type="submit"
-          className="rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800"
+          className="mt-2 self-start rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800"
         >
           Buscar
         </button>
@@ -116,7 +138,7 @@ export default async function SearchPage({
               <li key={pro.id} className="rounded-lg border border-zinc-200 p-4">
                 <div className="flex items-baseline justify-between">
                   <h2 className="font-medium text-zinc-900">{name}</h2>
-                  <span className="text-sm text-zinc-500">{pro.city}</span>
+                  <span className="text-sm text-zinc-500">{coverageLabel(pro)}</span>
                 </div>
                 {pro.bio && <p className="mt-1 text-sm text-zinc-600">{pro.bio}</p>}
                 <p className="mt-2 text-xs text-zinc-500">

@@ -1,12 +1,19 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { activateProfessional, addAvailability, removeAvailability } from "./actions";
-import { LocationFields } from "@/components/LocationFields";
+import { OptionalLocationFields } from "@/components/OptionalLocationFields";
 
 const TIMEFRAME_LABEL: Record<string, string> = {
   morning: "Mañana",
   afternoon: "Tarde",
 };
+
+function coverageLabel(region: string | null, province: string | null, city: string | null) {
+  if (city) return `${city} (${province})`;
+  if (province) return `Toda la provincia de ${province}`;
+  if (region) return `Toda ${region}`;
+  return "Toda España";
+}
 
 export default async function ProfessionalPage({
   searchParams,
@@ -24,7 +31,7 @@ export default async function ProfessionalPage({
 
   const { data: professional } = await supabase
     .from("professional_profiles")
-    .select("city, bio")
+    .select("coverage_region, coverage_province, coverage_city, bio")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -43,7 +50,6 @@ export default async function ProfessionalPage({
         {errorBanner}
 
         <form action={activateProfessional} className="mt-6 flex flex-col gap-4">
-          <LocationFields />
           <div>
             <label htmlFor="bio" className="block text-sm font-medium text-zinc-700">
               Descripción breve
@@ -65,6 +71,14 @@ export default async function ProfessionalPage({
                 </label>
               ))}
             </div>
+          </fieldset>
+          <fieldset className="flex flex-col gap-4">
+            <legend className="text-sm font-medium text-zinc-700">Radio de actuación</legend>
+            <p className="text-xs text-zinc-500">
+              Sin mapa todavía: elige hasta qué nivel quieres acotar dónde trabajas. Puedes
+              dejarlo en &quot;Toda España&quot; si te desplazas a cualquier sitio.
+            </p>
+            <OptionalLocationFields />
           </fieldset>
           <button
             type="submit"
@@ -89,7 +103,12 @@ export default async function ProfessionalPage({
     <div className="mx-auto w-full max-w-lg px-4 py-16">
       <h1 className="text-2xl font-semibold text-zinc-900">Tu disponibilidad</h1>
       <p className="mt-1 text-sm text-zinc-600">
-        {professional.city} · marca las franjas en las que puedes atender un trabajo.
+        {coverageLabel(
+          professional.coverage_region,
+          professional.coverage_province,
+          professional.coverage_city
+        )}{" "}
+        · marca las franjas en las que puedes atender un trabajo.
       </p>
 
       {errorBanner}

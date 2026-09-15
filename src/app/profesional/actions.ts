@@ -11,15 +11,16 @@ export async function activateProfessional(formData: FormData) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/entrar");
 
-  const city = String(formData.get("city"));
-  const province = String(formData.get("province"));
-  const region = String(formData.get("region"));
+  // Radio de actuación: cada nivel vacío significa "sin acotar" a partir de ahí.
+  const coverage_city = String(formData.get("city") || "") || null;
+  const coverage_province = String(formData.get("province") || "") || null;
+  const coverage_region = String(formData.get("region") || "") || null;
   const bio = String(formData.get("bio") || "");
   const tradeIds = formData.getAll("trade_ids").map(Number);
 
   const { error: profileError } = await supabase
     .from("professional_profiles")
-    .insert({ id: user.id, city, province, region, bio });
+    .insert({ id: user.id, coverage_city, coverage_province, coverage_region, bio });
 
   if (profileError) {
     redirect(`/profesional?error=${encodeURIComponent(profileError.message)}`);
