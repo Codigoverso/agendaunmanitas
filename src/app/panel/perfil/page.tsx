@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { uploadAvatar } from "../actions";
-import { firstOf, coverageLabel } from "@/lib/professional";
+import { uploadAvatar, updateTrades } from "../actions";
+import { coverageLabel } from "@/lib/professional";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
 import Typography from "@mui/material/Typography";
@@ -9,6 +9,9 @@ import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
+import FormGroup from "@mui/material/FormGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
 
 function InfoRow({ label, value }: { label: string; value?: string }) {
   return (
@@ -47,12 +50,15 @@ export default async function PerfilPage({
     .eq("id", user.id)
     .maybeSingle();
 
-  const { data: trades } = professional
-    ? await supabase
-        .from("professional_trades")
-        .select("trades(label)")
-        .eq("professional_id", user.id)
+  const { data: allTrades } = professional
+    ? await supabase.from("trades").select("id, label").order("id")
     : { data: null };
+
+  const { data: myTrades } = professional
+    ? await supabase.from("professional_trades").select("trade_id").eq("professional_id", user.id)
+    : { data: null };
+
+  const selectedTradeIds = new Set((myTrades ?? []).map((t) => t.trade_id));
 
   return (
     <Box>
@@ -99,26 +105,46 @@ export default async function PerfilPage({
       </Card>
 
       {professional && (
-        <Card variant="outlined" sx={{ mt: 3 }}>
-          <CardContent>
-            <Typography variant="subtitle2" gutterBottom>
-              Como profesional
-            </Typography>
-            <Stack spacing={0.5} sx={{ mt: 1 }}>
-              <InfoRow
-                label="Oficios"
-                value={
-                  trades
-                    ?.map((t) => firstOf(t.trades)?.label)
-                    .filter(Boolean)
-                    .join(", ") || "—"
-                }
-              />
-              <InfoRow label="Cobertura" value={coverageLabel(professional)} />
-              {professional.bio && <InfoRow label="Descripción" value={professional.bio} />}
-            </Stack>
-          </CardContent>
-        </Card>
+        <>
+          <Card variant="outlined" sx={{ mt: 3 }}>
+            <CardContent>
+              <Typography variant="subtitle2" gutterBottom>
+                Como profesional
+              </Typography>
+              <Stack spacing={0.5} sx={{ mt: 1 }}>
+                <InfoRow label="Cobertura" value={coverageLabel(professional)} />
+                {professional.bio && <InfoRow label="Descripción" value={professional.bio} />}
+              </Stack>
+            </CardContent>
+          </Card>
+
+          <Card variant="outlined" sx={{ mt: 3 }}>
+            <CardContent>
+              <Typography variant="subtitle2" gutterBottom>
+                Tus oficios
+              </Typography>
+              <Box component="form" action={updateTrades} sx={{ mt: 1 }}>
+                <FormGroup row>
+                  {allTrades?.map((trade) => (
+                    <FormControlLabel
+                      key={trade.id}
+                      sx={{ width: { xs: "100%", sm: "48%" } }}
+                      control={
+                        <Checkbox
+                          name="trade_ids"
+                          value={trade.id}
+                          defaultChecked={selectedTradeIds.has(trade.id)}
+                        />
+                      }
+                      label={trade.label}
+                    />
+                  ))}
+                </FormGroup>
+                <SubmitButton sx={{ mt: 1 }}>Guardar oficios</SubmitButton>
+              </Box>
+            </CardContent>
+          </Card>
+        </>
       )}
     </Box>
   );

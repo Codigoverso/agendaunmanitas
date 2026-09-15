@@ -64,6 +64,31 @@ export async function setWeeklyAvailability(formData: FormData) {
   redirect(`/panel/horario?message=${encodeURIComponent("Horario guardado.")}`);
 }
 
+export async function updateTrades(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/entrar");
+
+  const tradeIds = formData.getAll("trade_ids").map(Number);
+
+  await supabase.from("professional_trades").delete().eq("professional_id", user.id);
+  if (tradeIds.length > 0) {
+    const { error } = await supabase
+      .from("professional_trades")
+      .insert(tradeIds.map((trade_id) => ({ professional_id: user.id, trade_id })));
+
+    if (error) {
+      redirect(`/panel/perfil?error=${encodeURIComponent(error.message)}`);
+    }
+  }
+
+  revalidatePath("/panel/perfil");
+  revalidatePath("/buscar");
+  redirect(`/panel/perfil?message=${encodeURIComponent("Oficios actualizados.")}`);
+}
+
 export async function toggleBlockedSlot(date: string, time: string, isBlocked: boolean) {
   const supabase = await createClient();
   const {
