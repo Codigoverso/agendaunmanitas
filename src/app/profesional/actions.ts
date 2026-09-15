@@ -17,9 +17,22 @@ export async function activateProfessional(formData: FormData) {
   const bio = String(formData.get("bio") || "");
   const tradeIds = formData.getAll("trade_ids").map(Number);
 
-  const { error: profileError } = await supabase
-    .from("professional_profiles")
-    .insert({ id: user.id, coverage_city, coverage_province, coverage_region, bio });
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", user.id)
+    .single();
+
+  const { error: profileError } = await supabase.from("professional_profiles").insert({
+    id: user.id,
+    full_name: profile?.full_name ?? null,
+    account_email: user.email ?? null,
+    claimed: true,
+    coverage_city,
+    coverage_province,
+    coverage_region,
+    bio,
+  });
 
   if (profileError) {
     redirect(`/profesional?error=${encodeURIComponent(profileError.message)}`);

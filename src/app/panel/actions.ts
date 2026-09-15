@@ -4,6 +4,12 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ADMIN_EMAIL } from "@/lib/admin";
+import { getResendClient, EMAIL_FROM } from "@/lib/resend";
+import {
+  inReviewEmailHtml,
+  listingDeletedEmailHtml,
+  reactivatedEmailHtml,
+} from "@/lib/emails/moderation";
 
 export async function uploadAvatar(formData: FormData) {
   const supabase = await createClient();
@@ -86,7 +92,12 @@ export async function updateProfile(formData: FormData) {
     redirect(`/panel/perfil?error=${encodeURIComponent(error.message)}`);
   }
 
+  // Si además es profesional, mantenemos su nombre público sincronizado
+  // (professional_profiles.full_name es la fuente de verdad en /buscar).
+  await supabase.from("professional_profiles").update({ full_name }).eq("id", user.id).eq("claimed", true);
+
   revalidatePath("/panel", "layout");
+  revalidatePath("/buscar");
   redirect(`/panel/perfil?message=${encodeURIComponent("Datos personales actualizados.")}`);
 }
 
@@ -198,6 +209,82 @@ export async function createUnclaimedListing(formData: FormData) {
   revalidatePath("/panel/admin");
   revalidatePath("/buscar");
   redirect(`/panel/admin?message=${encodeURIComponent("Negocio añadido al directorio.")}`);
+}
+
+export async function setProfessionalActive(id: string, active: boolean) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user || user.email !== ADMIN_EMAIL) redirect("/panel/perfil");
+
+  const { data: target } = await supabase
+    .from("professional_profiles")
+    .select("full_name, account_email")
+    .eq("id", id)
+    .single();
+
+  await supabase.from("professional_profiles").update({ is_active: active }).eq("id", id);
+
+  if (target?.account_email) {
+    const resend = getResendClient();
+    if (resend) {
+      try {
+        await resend.emails.send({
+          from: EMAIL_FROM,
+          to: target.account_email,
+          subject: active ? "Tu perfil vuelve a estar activo" : "Tu perfil está en revisión",
+          html: active
+            ? reactivatedEmailHtml(target.full_name ?? "")
+            : inReviewEmailHtml(target.full_name ?? ""),
+        });
+      } catch (err) {
+        console.error("No se pudo enviar el email de moderación:", err);
+      }
+    }
+  }
+
+  revalidatePath("/panel/admin");
+  revalidatePath("/buscar");
+  redirect(
+    `/panel/admin?message=${encodeURIComponent(active ? "Perfil reactivado." : "Perfil marcado en revisión.")}`
+  );
+}
+
+export async function deleteProfessionalListing(id: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user || user.email !== ADMIN_EMAIL) redirect("/panel/perfil");
+
+  const { data: target } = await supabase
+    .from("professional_profiles")
+    .select("full_name, account_email")
+    .eq("id", id)
+    .single();
+
+  await supabase.from("professional_profiles").delete().eq("id", id);
+
+  if (target?.account_email) {
+    const resend = getResendClient();
+    if (resend) {
+      try {
+        await resend.emails.send({
+          from: EMAIL_FROM,
+          to: target.account_email,
+          subject: "Tu perfil de negocio ha sido eliminado",
+          html: listingDeletedEmailHtml(target.full_name ?? ""),
+        });
+      } catch (err) {
+        console.error("No se pudo enviar el email de moderación:", err);
+      }
+    }
+  }
+
+  revalidatePath("/panel/admin");
+  revalidatePath("/buscar");
+  redirect(`/panel/admin?message=${encodeURIComponent("Perfil eliminado.")}`);
 }
 
 export async function toggleBlockedSlot(date: string, time: string, isBlocked: boolean) {

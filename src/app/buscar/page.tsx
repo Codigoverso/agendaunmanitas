@@ -28,7 +28,6 @@ type ProfessionalResult = {
   contact_email: string | null;
   contact_phone: string | null;
   contact_address: string | null;
-  profiles: { full_name: string } | { full_name: string }[] | null;
   professional_trades: { trade_id: number; trades: { label: string } | { label: string }[] | null }[];
   weekly_availability: { day_of_week: number; start_time: string; end_time: string }[];
   blocked_slots: { date: string; start_time: string }[];
@@ -83,7 +82,7 @@ export default async function SearchPage({
   let query = supabase
     .from("professional_profiles")
     .select(
-      `id, full_name, claimed, coverage_region, coverage_province, coverage_city, bio, contact_email, contact_phone, contact_address, profiles(full_name), ${selectTrades}, ${selectWeekly}${selectBlocked}`
+      `id, full_name, claimed, coverage_region, coverage_province, coverage_city, bio, contact_email, contact_phone, contact_address, ${selectTrades}, ${selectWeekly}${selectBlocked}`
     )
     .eq("is_active", true);
 
@@ -144,7 +143,7 @@ export default async function SearchPage({
       <Stack spacing={2} sx={{ mt: 4 }}>
         {results && results.length > 0 ? (
           results.map((pro) => {
-            const name = pro.full_name || firstOf(pro.profiles)?.full_name || "Profesional";
+            const name = pro.full_name || "Profesional";
             const { schedule, slots } = date ? freeSlotsOn(pro, date) : { schedule: null, slots: [] };
             return (
               <Card key={pro.id} variant="outlined">

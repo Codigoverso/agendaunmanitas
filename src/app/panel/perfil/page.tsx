@@ -36,7 +36,7 @@ export default async function PerfilPage({
   const { data: professional } = await supabase
     .from("professional_profiles")
     .select(
-      "bio, coverage_region, coverage_province, coverage_city, contact_email, contact_phone, contact_address"
+      "bio, coverage_region, coverage_province, coverage_city, contact_email, contact_phone, contact_address, is_active"
     )
     .eq("id", user.id)
     .maybeSingle();
@@ -99,6 +99,14 @@ export default async function PerfilPage({
 
       {professional && (
         <>
+          {!professional.is_active && (
+            <Box sx={{ mt: 3 }}>
+              <Notice type="error">
+                Tu perfil está en revisión y no aparece en las búsquedas mientras tanto.
+              </Notice>
+            </Box>
+          )}
+
           <Card variant="outlined" sx={{ mt: 3 }}>
             <CardContent>
               <Typography variant="subtitle2" gutterBottom>

@@ -1,10 +1,11 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { createUnclaimedListing } from "../actions";
+import { createUnclaimedListing, setProfessionalActive, deleteProfessionalListing } from "../actions";
 import { ADMIN_EMAIL } from "@/lib/admin";
 import { OptionalLocationFields } from "@/components/OptionalLocationFields";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
+import { ConfirmButton } from "@/components/ConfirmButton";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
@@ -36,6 +37,14 @@ export default async function AdminPage({
       "id, full_name, coverage_city, coverage_region, contact_email, contact_phone, professional_trades(trades(label))"
     )
     .eq("claimed", false)
+    .order("id");
+
+  const { data: claimedProfiles } = await supabase
+    .from("professional_profiles")
+    .select(
+      "id, full_name, account_email, is_active, coverage_city, coverage_region, professional_trades(trades(label))"
+    )
+    .eq("claimed", true)
     .order("id");
 
   return (
@@ -133,6 +142,66 @@ export default async function AdminPage({
                   )}
                 </Box>
                 <Chip size="small" label="No registrado" color="default" />
+              </CardContent>
+            </Card>
+          );
+        })}
+      </Stack>
+
+      <Typography variant="subtitle1" sx={{ fontWeight: 600, mt: 5 }}>
+        Perfiles registrados — moderación ({claimedProfiles?.length ?? 0})
+      </Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+        Marcar en revisión oculta el perfil de la búsqueda y avisa al profesional por email;
+        eliminar borra el perfil (y su horario) y le avisa de que no cumple las normas del sitio.
+      </Typography>
+      <Stack spacing={1.5} sx={{ mt: 2 }}>
+        {claimedProfiles?.map((pro) => {
+          const tradeLabels = pro.professional_trades
+            .map((pt) => {
+              const t = Array.isArray(pt.trades) ? pt.trades[0] : pt.trades;
+              return t?.label;
+            })
+            .filter(Boolean)
+            .join(", ");
+          return (
+            <Card key={pro.id} variant="outlined">
+              <CardContent
+                sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 1 }}
+              >
+                <Box>
+                  <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                    <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                      {pro.full_name || "Sin nombre"}
+                    </Typography>
+                    {!pro.is_active && <Chip size="small" color="warning" label="En revisión" />}
+                  </Stack>
+                  <Typography variant="body2" color="text.secondary">
+                    {tradeLabels || "Sin oficios"} · {pro.coverage_city || pro.coverage_region || "Toda España"}
+                  </Typography>
+                  {pro.account_email && (
+                    <Typography variant="caption" color="text.secondary">
+                      {pro.account_email}
+                    </Typography>
+                  )}
+                </Box>
+                <Stack direction="row" spacing={1}>
+                  <form action={setProfessionalActive.bind(null, pro.id, !pro.is_active)}>
+                    <SubmitButton size="small" variant="outlined">
+                      {pro.is_active ? "Marcar en revisión" : "Reactivar"}
+                    </SubmitButton>
+                  </form>
+                  <form action={deleteProfessionalListing.bind(null, pro.id)}>
+                    <ConfirmButton
+                      size="small"
+                      color="error"
+                      variant="outlined"
+                      confirmText={`¿Eliminar el perfil de "${pro.full_name}"? Se avisará por email y no se puede deshacer.`}
+                    >
+                      Eliminar
+                    </ConfirmButton>
+                  </form>
+                </Stack>
               </CardContent>
             </Card>
           );
