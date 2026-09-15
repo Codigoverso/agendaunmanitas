@@ -1,12 +1,12 @@
 # AgendaUnManitas
 
-Marketplace para encontrar electricista, fontanero, carpintero, albañil, pintor o
-cerrajero según su disponibilidad real (calendario de día + franja), en vez de pedir
-presupuesto a ciegas.
+Marketplace para encontrar un profesional (electricista, fontanero, carpintero, albañil,
+pintor, cerrajero, instalador de aire acondicionado y más) según su disponibilidad real
+(calendario semanal por horas), en vez de pedir presupuesto a ciegas.
 
 ## Stack
 
-- **Frontend**: Next.js (App Router) + Tailwind CSS
+- **Frontend**: Next.js (App Router) + MUI (Material Design)
 - **Backend/datos**: Supabase (Postgres + Auth + Storage)
 - **Emails**: Resend (email de bienvenida al registrarse)
 
@@ -21,9 +21,8 @@ presupuesto a ciegas.
 3. Copia `.env.local.example` a `.env.local` y rellena:
    - `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (Project Settings → API Keys en Supabase, clave "Publishable key")
    - `RESEND_API_KEY` (API Key de Resend)
-4. Ejecuta el esquema inicial: abre el SQL Editor de tu proyecto de Supabase y
-   pega el contenido de `supabase/migrations/20260915000000_init_schema.sql`
-   y de `supabase/migrations/20260915000100_profile_on_signup.sql`.
+4. Ejecuta, en orden, todas las migraciones de `supabase/migrations/` en el SQL
+   Editor de tu proyecto de Supabase (una detrás de otra, por fecha).
 5. Instala dependencias y arranca el servidor de desarrollo:
 
    ```bash
@@ -33,11 +32,15 @@ presupuesto a ciegas.
 
 ## Estructura de datos (v1)
 
-- `profiles` — cualquier usuario autenticado (cliente y/o profesional)
-- `trades` — lista cerrada de oficios (electricista, fontanero, carpintero, albañil, pintor, cerrajero)
-- `professional_profiles` — datos de profesional (ciudad, bio)
+- `profiles` — cualquier usuario autenticado (cliente y/o profesional); ubicación
+  como país/comunidad autónoma (`region`)/provincia (`province`)/población (`city`)
+- `trades` — lista cerrada de oficios
+- `professional_profiles` — datos de profesional (bio) y radio de actuación
+  (`coverage_region`/`coverage_province`/`coverage_city`, todos opcionales: dejarlos
+  en blanco de un nivel hacia abajo significa "sin acotar" ahí)
 - `professional_trades` — oficios de cada profesional
-- `availability_slots` — franjas libres (día + mañana/tarde)
+- `weekly_availability` — horario habitual por día de la semana (`start_time`–`end_time`)
+- `blocked_slots` — medias horas concretas marcadas como ocupadas (excepción sobre el horario semanal)
 - `requests` — solicitud cliente→profesional con estado (pendiente/aceptada/rechazada/completada)
 - `reviews` — reseña del cliente tras un trabajo completado
 
