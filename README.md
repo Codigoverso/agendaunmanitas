@@ -14,7 +14,7 @@ presupuesto a ciegas.
 
 1. Crea un proyecto en [supabase.com](https://supabase.com) (tier gratuito).
 2. Copia `.env.local.example` a `.env.local` y rellena:
-   - `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Project Settings → API en Supabase)
+   - `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (Project Settings → API Keys en Supabase, clave "Publishable key")
    - `RESEND_API_KEY` (cuando se integren los emails)
 3. Ejecuta el esquema inicial: abre el SQL Editor de tu proyecto de Supabase y
    pega el contenido de `supabase/migrations/20260915000000_init_schema.sql`.
