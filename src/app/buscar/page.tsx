@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { OptionalLocationFields } from "@/components/OptionalLocationFields";
+import { isoWeekday } from "@/lib/dates";
 
 const TIMEFRAME_LABEL: Record<string, string> = {
   morning: "Mañana",
@@ -14,7 +15,8 @@ type ProfessionalResult = {
   bio: string | null;
   profiles: { full_name: string } | { full_name: string }[] | null;
   professional_trades: { trade_id: number; trades: { label: string } | { label: string }[] | null }[];
-  availability_slots: { date: string; timeframe: string }[];
+  weekly_availability: { day_of_week: number; timeframe: string }[];
+  blocked_slots: { date: string; timeframe: string }[];
 };
 
 function firstOf<T>(value: T | T[] | null): T | null {
@@ -42,6 +44,17 @@ function matchesLocation(
   return true;
 }
 
+// Disponible esa fecha = franjas de su horario semanal para ese día de la
+// semana, menos las que haya marcado como ocupadas justo esa fecha.
+function availableTimeframesOn(pro: ProfessionalResult, date: string) {
+  const dow = isoWeekday(date);
+  const blocked = new Set(pro.blocked_slots.map((b) => b.timeframe));
+  return pro.weekly_availability
+    .filter((w) => w.day_of_week === dow)
+    .map((w) => w.timeframe)
+    .filter((tf) => !blocked.has(tf));
+}
+
 export default async function SearchPage({
   searchParams,
 }: {
@@ -52,25 +65,32 @@ export default async function SearchPage({
 
   const { data: trades } = await supabase.from("trades").select("id, slug, label").order("id");
 
+  const dow = date ? isoWeekday(date) : null;
   const selectTrades = trade
     ? "professional_trades!inner(trade_id, trades(label))"
     : "professional_trades(trade_id, trades(label))";
-  const selectSlots = date
-    ? "availability_slots!inner(date, timeframe)"
-    : "availability_slots(date, timeframe)";
+  const selectWeekly = dow
+    ? "weekly_availability!inner(day_of_week, timeframe)"
+    : "weekly_availability(day_of_week, timeframe)";
+  const selectBlocked = date ? ", blocked_slots(date, timeframe)" : "";
 
   let query = supabase
     .from("professional_profiles")
     .select(
-      `id, coverage_region, coverage_province, coverage_city, bio, profiles(full_name), ${selectTrades}, ${selectSlots}`
+      `id, coverage_region, coverage_province, coverage_city, bio, profiles(full_name), ${selectTrades}, ${selectWeekly}${selectBlocked}`
     )
     .eq("is_active", true);
 
   if (trade) query = query.eq("professional_trades.trade_id", Number(trade));
-  if (date) query = query.eq("availability_slots.date", date);
+  if (dow) query = query.eq("weekly_availability.day_of_week", dow);
+  if (date) query = query.eq("blocked_slots.date", date);
 
   const { data: rawResults, error } = await query.returns<ProfessionalResult[]>();
-  const results = rawResults?.filter((pro) => matchesLocation(pro, region, province, city));
+
+  let results = rawResults?.filter((pro) => matchesLocation(pro, region, province, city));
+  if (date) {
+    results = results?.filter((pro) => availableTimeframesOn(pro, date).length > 0);
+  }
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-16">
@@ -134,6 +154,7 @@ export default async function SearchPage({
         {results && results.length > 0 ? (
           results.map((pro) => {
             const name = firstOf(pro.profiles)?.full_name ?? "Profesional";
+            const availableToday = date ? availableTimeframesOn(pro, date) : [];
             return (
               <li key={pro.id} className="rounded-lg border border-zinc-200 p-4">
                 <div className="flex items-baseline justify-between">
@@ -147,12 +168,9 @@ export default async function SearchPage({
                     .filter(Boolean)
                     .join(" · ")}
                 </p>
-                {date && pro.availability_slots.length > 0 && (
+                {date && availableToday.length > 0 && (
                   <p className="mt-2 text-sm text-teal-700">
-                    Libre el {date}:{" "}
-                    {pro.availability_slots
-                      .map((s) => TIMEFRAME_LABEL[s.timeframe])
-                      .join(", ")}
+                    Libre el {date}: {availableToday.map((tf) => TIMEFRAME_LABEL[tf]).join(", ")}
                   </p>
                 )}
               </li>

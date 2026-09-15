@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
@@ -36,39 +35,5 @@ export async function activateProfessional(formData: FormData) {
     }
   }
 
-  revalidatePath("/profesional");
-}
-
-export async function addAvailability(formData: FormData) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/entrar");
-
-  const date = String(formData.get("date"));
-  const timeframe = String(formData.get("timeframe"));
-
-  const { error } = await supabase
-    .from("availability_slots")
-    .insert({ professional_id: user.id, date, timeframe });
-
-  if (error && error.code !== "23505") {
-    // 23505 = ya existía esa franja; lo tratamos como éxito silencioso.
-    redirect(`/profesional?error=${encodeURIComponent(error.message)}`);
-  }
-
-  revalidatePath("/profesional");
-}
-
-export async function removeAvailability(id: number) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/entrar");
-
-  await supabase.from("availability_slots").delete().eq("id", id).eq("professional_id", user.id);
-
-  revalidatePath("/profesional");
+  redirect("/panel");
 }
