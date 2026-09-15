@@ -1,11 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { OptionalLocationFields } from "@/components/OptionalLocationFields";
-import { isoWeekday } from "@/lib/dates";
-
-const TIMEFRAME_LABEL: Record<string, string> = {
-  morning: "Mañana",
-  afternoon: "Tarde",
-};
+import { isoWeekday, halfHourSlotsInRange } from "@/lib/dates";
+import { firstOf, coverageLabel } from "@/lib/professional";
 
 type ProfessionalResult = {
   id: string;
@@ -15,19 +11,21 @@ type ProfessionalResult = {
   bio: string | null;
   profiles: { full_name: string } | { full_name: string }[] | null;
   professional_trades: { trade_id: number; trades: { label: string } | { label: string }[] | null }[];
-  weekly_availability: { day_of_week: number; timeframe: string }[];
-  blocked_slots: { date: string; timeframe: string }[];
+  weekly_availability: { day_of_week: number; start_time: string; end_time: string }[];
+  blocked_slots: { date: string; start_time: string }[];
 };
 
-function firstOf<T>(value: T | T[] | null): T | null {
-  return Array.isArray(value) ? (value[0] ?? null) : value;
-}
-
-function coverageLabel(pro: ProfessionalResult) {
-  if (pro.coverage_city) return `${pro.coverage_city} (${pro.coverage_province})`;
-  if (pro.coverage_province) return `Toda la provincia de ${pro.coverage_province}`;
-  if (pro.coverage_region) return `Toda ${pro.coverage_region}`;
-  return "Toda España";
+// Huecos libres ese día = medias horas de su horario habitual para ese día
+// de la semana, menos las que haya marcado como ocupadas justo esa fecha.
+function freeSlotsOn(pro: ProfessionalResult, date: string) {
+  const dow = isoWeekday(date);
+  const schedule = pro.weekly_availability.find((w) => w.day_of_week === dow);
+  if (!schedule) return { schedule: null, slots: [] as string[] };
+  const blocked = new Set(pro.blocked_slots.map((b) => b.start_time.slice(0, 5)));
+  const slots = halfHourSlotsInRange(schedule.start_time, schedule.end_time).filter(
+    (t) => !blocked.has(t)
+  );
+  return { schedule, slots };
 }
 
 // Un profesional encaja si, en cada nivel que el cliente ha acotado, su
@@ -42,17 +40,6 @@ function matchesLocation(
   if (province && pro.coverage_province && pro.coverage_province !== province) return false;
   if (city && pro.coverage_city && pro.coverage_city !== city) return false;
   return true;
-}
-
-// Disponible esa fecha = franjas de su horario semanal para ese día de la
-// semana, menos las que haya marcado como ocupadas justo esa fecha.
-function availableTimeframesOn(pro: ProfessionalResult, date: string) {
-  const dow = isoWeekday(date);
-  const blocked = new Set(pro.blocked_slots.map((b) => b.timeframe));
-  return pro.weekly_availability
-    .filter((w) => w.day_of_week === dow)
-    .map((w) => w.timeframe)
-    .filter((tf) => !blocked.has(tf));
 }
 
 export default async function SearchPage({
@@ -70,9 +57,9 @@ export default async function SearchPage({
     ? "professional_trades!inner(trade_id, trades(label))"
     : "professional_trades(trade_id, trades(label))";
   const selectWeekly = dow
-    ? "weekly_availability!inner(day_of_week, timeframe)"
-    : "weekly_availability(day_of_week, timeframe)";
-  const selectBlocked = date ? ", blocked_slots(date, timeframe)" : "";
+    ? "weekly_availability!inner(day_of_week, start_time, end_time)"
+    : "weekly_availability(day_of_week, start_time, end_time)";
+  const selectBlocked = date ? ", blocked_slots(date, start_time)" : "";
 
   let query = supabase
     .from("professional_profiles")
@@ -89,7 +76,7 @@ export default async function SearchPage({
 
   let results = rawResults?.filter((pro) => matchesLocation(pro, region, province, city));
   if (date) {
-    results = results?.filter((pro) => availableTimeframesOn(pro, date).length > 0);
+    results = results?.filter((pro) => freeSlotsOn(pro, date).slots.length > 0);
   }
 
   return (
@@ -154,7 +141,7 @@ export default async function SearchPage({
         {results && results.length > 0 ? (
           results.map((pro) => {
             const name = firstOf(pro.profiles)?.full_name ?? "Profesional";
-            const availableToday = date ? availableTimeframesOn(pro, date) : [];
+            const { schedule, slots } = date ? freeSlotsOn(pro, date) : { schedule: null, slots: [] };
             return (
               <li key={pro.id} className="rounded-lg border border-zinc-200 p-4">
                 <div className="flex items-baseline justify-between">
@@ -168,9 +155,10 @@ export default async function SearchPage({
                     .filter(Boolean)
                     .join(" · ")}
                 </p>
-                {date && availableToday.length > 0 && (
+                {date && schedule && slots.length > 0 && (
                   <p className="mt-2 text-sm text-teal-700">
-                    Libre el {date}: {availableToday.map((tf) => TIMEFRAME_LABEL[tf]).join(", ")}
+                    Libre el {date}, horario habitual {schedule.start_time.slice(0, 5)}–
+                    {schedule.end_time.slice(0, 5)} ({slots.length} huecos de media hora)
                   </p>
                 )}
               </li>
