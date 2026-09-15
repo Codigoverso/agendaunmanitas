@@ -1,6 +1,8 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
+import Avatar from "@mui/material/Avatar";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import { LinkButton } from "@/components/LinkButton";
 
 export default function Home() {
@@ -17,10 +19,13 @@ export default function Home() {
         bgcolor: "background.default",
       }}
     >
-      <Typography variant="h3" color="text.primary" sx={{ fontWeight: 600 }}>
+      <Avatar sx={{ width: 72, height: 72, bgcolor: "primary.main", mb: 3 }}>
+        <CalendarMonthIcon sx={{ fontSize: 36 }} />
+      </Avatar>
+      <Typography variant="h3" color="text.primary" sx={{ fontWeight: 700 }}>
         AgendaUnManitas
       </Typography>
-      <Typography variant="h6" color="text.secondary" sx={{ mt: 2, maxWidth: 480 }}>
+      <Typography variant="h6" color="text.secondary" sx={{ mt: 2, maxWidth: 480, fontWeight: 400 }}>
         Encuentra un profesional según su disponibilidad real — no una lista de contactos a
         ciegas.
       </Typography>
