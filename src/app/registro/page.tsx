@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { signUp } from "@/app/auth/actions";
+import { LocationFields } from "@/components/LocationFields";
 
 export default async function SignupPage({
   searchParams,
@@ -36,17 +37,7 @@ export default async function SignupPage({
               className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none"
             />
           </div>
-          <div>
-            <label htmlFor="city" className="block text-sm font-medium text-zinc-700">
-              Ciudad
-            </label>
-            <input
-              id="city"
-              name="city"
-              type="text"
-              className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none"
-            />
-          </div>
+          <LocationFields />
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-zinc-700">
               Email

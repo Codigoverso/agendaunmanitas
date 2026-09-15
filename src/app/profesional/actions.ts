@@ -12,12 +12,13 @@ export async function activateProfessional(formData: FormData) {
   if (!user) redirect("/entrar");
 
   const city = String(formData.get("city"));
+  const region = String(formData.get("region"));
   const bio = String(formData.get("bio") || "");
   const tradeIds = formData.getAll("trade_ids").map(Number);
 
   const { error: profileError } = await supabase
     .from("professional_profiles")
-    .insert({ id: user.id, city, bio });
+    .insert({ id: user.id, city, region, bio });
 
   if (profileError) {
     redirect(`/profesional?error=${encodeURIComponent(profileError.message)}`);

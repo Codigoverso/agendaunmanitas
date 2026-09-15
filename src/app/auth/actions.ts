@@ -10,12 +10,13 @@ export async function signUp(formData: FormData) {
   const password = String(formData.get("password"));
   const fullName = String(formData.get("full_name"));
   const city = String(formData.get("city"));
+  const region = String(formData.get("region"));
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { full_name: fullName, city } },
+    options: { data: { full_name: fullName, city, region } },
   });
 
   if (error) {

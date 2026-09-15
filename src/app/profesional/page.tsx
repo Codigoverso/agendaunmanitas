@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { activateProfessional, addAvailability, removeAvailability } from "./actions";
+import { LocationFields } from "@/components/LocationFields";
 
 const TIMEFRAME_LABEL: Record<string, string> = {
   morning: "Mañana",
@@ -42,18 +43,7 @@ export default async function ProfessionalPage({
         {errorBanner}
 
         <form action={activateProfessional} className="mt-6 flex flex-col gap-4">
-          <div>
-            <label htmlFor="city" className="block text-sm font-medium text-zinc-700">
-              Ciudad
-            </label>
-            <input
-              id="city"
-              name="city"
-              type="text"
-              required
-              className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none"
-            />
-          </div>
+          <LocationFields />
           <div>
             <label htmlFor="bio" className="block text-sm font-medium text-zinc-700">
               Descripción breve
